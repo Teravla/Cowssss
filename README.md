@@ -34,7 +34,7 @@ De plus, chaque tick, les évènements suivants se passent:
 
     - Chaque vache perd 10% de faim
     - Chaque vache perd 10% de soif
-    - Chaque vache gagne 5% de lait
+    - Chaque vache gagne 5% de lait si elle a plus de 80% de faim et 90% de soif
 
 Quoiqu'il se passe, les vaches produisent du lait si leur jauge de faim et de soif sont > 80%. Elle peuvent être traite à n'importe quel moment. Toutefois, la vache doit se rendre à la ferme pour être trait selon les conditions suivantes:
 

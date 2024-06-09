@@ -8,6 +8,17 @@ class Box:
         self.y = y
         self.color = color
         self.has_cow = False
+        self.turns_since_yellow = 0  # Compteur pour suivre les tours depuis que la case est jaune
+        self.rectangle_id = None  # Identifiant du rectangle dans l'interface graphique
+
+    def update_color(self):
+        if self.color == "yellow":
+            if self.turns_since_yellow == 3:
+                self.color = "green"
+                self.canvas.itemconfig(self.rectangle_id, fill="green")  # Met à jour la couleur de la case dans l'interface graphique
+                self.turns_since_yellow = 0  # Réinitialise le compteur après avoir changé la couleur à vert
+            self.turns_since_yellow += 1
+
 
 def colorized_box(percentage, nb_square_per_line):
     # Répartition des couleurs
@@ -27,6 +38,9 @@ def box_creation(canvas, pre, percentage, square_length, spacing):
         for j in range(nb_square):
             x0, y0 = i * (square_length + spacing) + spacing, j * (square_length + spacing) + spacing  # Position de départ de la case avec un espacement
             x1, y1 = x0 + square_length, y0 + square_length  # Taille de la case
-            box = Box(canvas, i, j, colors[i * nb_square + j])  # Création d'une nouvelle case avec ses coordonnées et sa couleur
-            canvas.create_rectangle(x0, y0, x1, y1, fill=box.color)  # Colorisation de la case avec sa couleur
+            if i == 0 and j == nb_square // 2:
+                box = Box(canvas, i, j, color="gray")  # Crée une case grise aux coordonnées spécifiées
+            else:
+                box = Box(canvas, i, j, colors[i * nb_square + j])
+            box.rectangle_id = canvas.create_rectangle(x0, y0, x1, y1, fill=box.color)  # Stocke l'identifiant du rectangle
             pre[i][j] = box  # Stockage de la case dans la grille

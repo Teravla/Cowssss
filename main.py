@@ -48,7 +48,7 @@ class InterfaceGraphique(tk.Tk):
 
         box_creation(self.canvas, self.pre, 0.98, square_length, spacing)
 
-        self.cows = create_cows(self.canvas, self.pre, nb_square, 9, 8, "black", square_length, spacing)  # Création des vaches avec un rayon de 8
+        self.cows = create_cows(self.canvas, self.pre, nb_square, 1, 8, "black", square_length, spacing)  # Création des vaches avec un rayon de 8
 
         # Demande à l'utilisateur de démarrer la simulation
         self.start_simulation()
@@ -66,8 +66,8 @@ class InterfaceGraphique(tk.Tk):
         
         print(f"Tour {self.nb_tour}")
         self.nb_tour += 1
-        simulate_tick(self.cows, self.pre)  # Passer la liste des vaches et la grille à la fonction simulate_tick
-        self.after(1000, self.tick)
+        simulate_tick(self.cows, self.pre, self.nb_tour)  # Passer la liste des vaches et la grille à la fonction simulate_tick
+        self.after(50, self.tick)
 
 if __name__ == "__main__":
     app = InterfaceGraphique()
