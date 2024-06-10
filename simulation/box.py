@@ -2,7 +2,7 @@ import random
 import tkinter as tk
 
 class Box:
-    def __init__(self, canvas, x, y, color="white", has_cow=False):
+    def __init__(self, canvas, x, y, color="white"):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -13,7 +13,7 @@ class Box:
 
     def update_color(self):
         if self.color == "yellow":
-            if self.turns_since_yellow == 3:
+            if self.turns_since_yellow == 10:
                 self.color = "green"
                 self.canvas.itemconfig(self.rectangle_id, fill="green")  # Met à jour la couleur de la case dans l'interface graphique
                 self.turns_since_yellow = 0  # Réinitialise le compteur après avoir changé la couleur à vert

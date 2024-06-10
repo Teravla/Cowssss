@@ -50,4 +50,4 @@ ________
 
 ### Objectif du modèle
 
-En partant de x vaches, voir comment une IA gérera la traite des vaches pour optimiser les revenus de l'eleveur en un temps imparti (1 minutes)
+En partant de x vaches, voir comment une IA gère la traite des vaches pour optimiser les revenus de l'eleveur en observant les évolutions du nombre de tours
