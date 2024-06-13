@@ -5,15 +5,17 @@
         "spacing": 10,
         "number_of_cows": 1,
         "percentage_water": 0.98,
-        "hunger_cow": 50,
-        "thirst_cow": 50,
+        "hunger_cow": 20,
+        "thirst_cow": 20,
         "milk_cow": 0, 
         "breeder_salary" : 0,
-        "number_ticks" : 1000
+        "number_ticks" : 50
     }, 
     "victory_condition" : {
         "breeder_salary" : 1000,
-        "milkings_time" : 2
+        "milkings_time" : 2,
+        "thirst_to_milk" : 80,
+        "hunger_to_milk" : 80
     },
 
     "cow_evolution" : {
@@ -23,5 +25,9 @@
         "add_thirst" : 100,
         "milk_evolution" : 10,
         "breeder_salary_evolution" : 10
+    }, 
+
+    "algorithm" : {
+        "to_farm" : "astar"
     }
 }

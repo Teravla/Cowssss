@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from simulation.algorithm.algorithms import Algorithm
 class Cow:
     # Variable statique pour attribuer un identifiant unique à chaque vache
     cow_id_counter = 0
@@ -12,6 +12,7 @@ class Cow:
         self.color = color
         self.dim_box = dim_box
         self.tick_count = 0
+        self.path_to_farm = []
 
         # Attributs des besoins de la vache
         self.hunger = init_hunger  # Jauge de faim (0-100)
@@ -19,12 +20,14 @@ class Cow:
         self.milk = init_milk  # Jauge de capacité laitière (0-100)
         self.alive = True  # État de vie de la vache
         self.number_milking = 0  # Nombre de fois que la vache a été traitée
+        self.reason_death = None  # Raison de la mort de la vache
 
         # Attributs de l'identifiant de la vache
         self.id = Cow.cow_id_counter
         Cow.cow_id_counter += 1
 
         self.farm = farm  # Référence à l'instance de la ferme
+        self.algo = Algorithm()
 
         self.draw(self.radius, self.color, self.dim_box)
 
@@ -35,32 +38,24 @@ class Cow:
         # Dessin du cercle noir avec l'identifiant de la vache comme étiquette
         self.circle_id = self.canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill=color)
 
-    def update_needs(self, hunger_evolution, thirst_evolution, milk_evolution):
+    def update_needs(self, hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk):
         # Exemple de mise à jour des besoins de la vache
         if self.thirst > 0 and self.hunger > 0:
             self.thirst -= thirst_evolution
             self.hunger -= hunger_evolution
 
-        self.make_milk(milk_evolution)
+        self.make_milk(milk_evolution, hunger_to_milk, thirst_to_milk)
 
         # Vache meurt si ses jauges sont à 0
         if self.hunger <= 0 or self.thirst <= 0:
             self.alive = False
+            self.reason_death = "hunger" if self.hunger <= 0 else "thirst"
 
-    def make_milk(self, milk_evolution):
-        if self.alive and self.hunger >= 80 and self.thirst >= 85:
+    def make_milk(self, milk_evolution, hunger_to_milk, thirst_to_milk):
+        if self.alive and self.hunger >= hunger_to_milk and self.thirst >= thirst_to_milk:
             print(f"Vache {self.id} produit du lait.")
             self.milk += milk_evolution
 
-    def move(self, dx, dy, grid):
-        if self.alive:
-            new_x = self.x + dx
-            new_y = self.y + dy
-            # Vérifie si la nouvelle position n'est pas une case bleue
-            if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and grid[new_x][new_y].color != "blue":
-                self.x = new_x
-                self.y = new_y
-                self.canvas.move(self.circle_id, dx * 30, dy * 30)  # Déplacer le cercle correspondant à la vache
 
     def find_nearest(self, grid, target_color):
         for radius in range(1, len(grid)):
@@ -72,42 +67,61 @@ class Cow:
                             return new_x, new_y
         return None
 
-    def go_to_farm(self, grid):
+    def move(self, dx, dy, grid, cows):
         if self.alive:
-            if self.milk >= 90:
-                if self.tick_count % 5 == 0:
-                    self.move_to_farm(grid)
-            elif self.milk >= 80:
-                if self.tick_count % 4 == 0:
-                    self.move_to_farm(grid)
-            elif self.milk >= 60:
-                if self.tick_count % 3 == 0:
-                    self.move_to_farm(grid)
-            elif self.milk >= 40:
-                if self.tick_count % 2 == 0:
-                    self.move_to_farm(grid)
-            elif self.milk >= 20:
-                if self.tick_count % 1 == 0:
-                    self.move_to_farm(grid)
+            new_x = self.x + dx
+            new_y = self.y + dy
+            
+            # Vérifie si la nouvelle position n'est pas une case bleue
+            if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and grid[new_x][new_y].color != "blue":
+                # Vérifie si la nouvelle position n'est pas déjà occupée par une autre vache
+                if not any(cow.x == new_x and cow.y == new_y for cow in cows if cow.alive and cow != self):
+                    self.x = new_x
+                    self.y = new_y
+                    self.canvas.move(self.circle_id, dx * 30, dy * 30)  # Déplacer le cercle correspondant à la vache
+                else:
+                    print(f"Vache {self.id} ne peut pas se déplacer sur une case occupée par une autre vache.")
+            else:
+                print(f"Vache {self.id} ne peut pas se déplacer sur la case bleue.")
+                print(f"La case bleue est à la position ({new_x}, {new_y}) et la vache est à la position ({self.x}, {self.y}).")
+                exit()
 
-    def move_to_farm(self, grid, breeder_salary):
-        farm_location = (0, len(grid) // 2)  # Coordonnées de la ferme
-        current_location = (self.x, self.y)
-        dx = farm_location[0] - current_location[0]
-        dy = farm_location[1] - current_location[1]
-        # Déplacer la vache d'une case vers la ferme
-        self.move(dx, dy, grid)
-        if self.x == farm_location[0] and self.y == farm_location[1]:
-            self.number_milking += 1  # Incrémente le compteur de traite
-            self.farm.breeder_salary += breeder_salary  # Augmente le salaire de l'éleveur dans la ferme
-            self.milk = 0  # Réinitialise la jauge de lait
+    def go_to_farm(self, grid, breeder_salary_evolution, algorithm):
+        if self.alive:
+            if not self.path_to_farm:  # Calcule le chemin seulement si nécessaire
+                if algorithm == 'astar':
+                    self.path_to_farm = self.algo.astar_pathfinding((self.x, self.y), (0, len(grid[0]) // 2), grid)
+                elif algorithm == 'dijkstra':
+                    self.path_to_farm = self.algo.dijkstra_pathfinding((self.x, self.y), (0, len(grid[0]) // 2), grid)
+                else:
+                    raise ValueError("Unknown algorithm specified.")
 
-    def act(self, grid, nb_tour, hunger_evolution, thirst_evolution, milk_evolution, add_hunger, add_thirst, breeder_salary_evolution):
+            if self.path_to_farm:
+                next_step = self.path_to_farm.pop(0)  # Prend la prochaine étape du chemin
+                dx = next_step[0] - self.x
+                dy = next_step[1] - self.y
+                self.move(dx, dy, grid, self.farm.cows)
+                if not self.alive:
+                    return
+
+                if self.x == 0 and self.y == len(grid[0]) // 2:
+                    self.number_milking += 1
+                    self.farm.breeder_salary += breeder_salary_evolution
+                    self.milk = 0
+                    self.hunger = 20
+                    self.thirst = 20
+                    self.path_to_farm = []  # Réinitialise le chemin après l'arrivée
+
+
+    def act(self, grid, nb_tour, hunger_evolution, thirst_evolution, milk_evolution, add_hunger, add_thirst, breeder_salary_evolution, hunger_to_milk, thirst_to_milk, algorithm_to_farm):
+
+
         print(f"Salaire de l'éleveur : {self.farm.breeder_salary}")
         self.tick_count += 1
 
         if self.number_milking >= 3:
             self.alive = False
+            self.reason_death = "milking"
             return
 
         needs_updated = False  # Variable pour suivre si les besoins ont été mis à jour
@@ -117,17 +131,17 @@ class Cow:
 
             if self.milk >= 100:
                 print(f"Cow {self.id} is going to the farm.")
-                self.move_to_farm(grid, breeder_salary_evolution)
-                needs_updated = True
+                self.go_to_farm(grid, breeder_salary_evolution, algorithm_to_farm)
+                
             else:
-                if self.thirst < 90:
+                if self.thirst < thirst_to_milk:
                     print(f"Cow {self.id} drinking water.")
                     target = self.find_nearest(grid, "blue")
                     if target:
                         self.move_towards(target, grid)
                         self.drink(grid, add_thirst)
                         needs_updated = True
-                elif self.hunger < 90:
+                elif self.hunger < hunger_to_milk:
                     print(f"Cow {self.id} eating grass.")
                     target = self.find_nearest(grid, "green")
                     if target:
@@ -136,9 +150,10 @@ class Cow:
                         needs_updated = True
                 else:
                     print(f"Cow {self.id} is wandering.")
+                    needs_updated = True
 
             if needs_updated:
-                self.update_needs(hunger_evolution, thirst_evolution, milk_evolution)
+                self.update_needs(hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk)
                 print(f"Fin du tour {nb_tour} Cow {self.id} is acting : hunger={self.hunger}, thirst={self.thirst}, milk={self.milk}\n")
                 return
 
@@ -159,11 +174,11 @@ class Cow:
 
             # Vérifie les mouvements possibles sans se déplacer vers une case bleue
             if 0 <= self.x + dx < len(grid) and 0 <= self.y + dy < len(grid[0]) and grid[self.x + dx][self.y + dy].color != "blue":
-                self.move(dx, dy, grid)
+                self.move(dx, dy, grid, self.farm.cows)
             elif dx != 0 and 0 <= self.x + dx < len(grid) and grid[self.x + dx][self.y].color != "blue":
-                self.move(dx, 0, grid)
+                self.move(dx, 0, grid, self.farm.cows)
             elif dy != 0 and 0 <= self.y + dy < len(grid[0]) and grid[self.x][self.y + dy].color != "blue":
-                self.move(0, dy, grid)
+                self.move(0, dy, grid, self.farm.cows)
 
     def drink(self, grid, add_thirst):
         for dx in range(-1, 2):

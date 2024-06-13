@@ -14,8 +14,10 @@ class InterfaceGraphique(tk.Tk):
         with open(self.config_file, 'r') as f:
             config_data = json.load(f)
 
-        init_params = config_data.get("init_paramter", {})  # 
-        cow_params = config_data.get("cow_evolution", {})  #
+        init_params = config_data.get("init_paramter", {}) 
+        cow_params = config_data.get("cow_evolution", {})
+        victory_params = config_data.get("victory_condition", {})
+        algorithm_params = config_data.get("algorithm", {})
 
         self.square_length = init_params.get("square_lenght", 20)
         self.nb_square = init_params.get("number_of_squares", 10)
@@ -34,6 +36,13 @@ class InterfaceGraphique(tk.Tk):
         self.add_thirst = cow_params.get("add_thirst", 100)
         self.breeder_salary_evolution = cow_params.get("breeder_salary_evolution", 10)
         self.number_ticks = init_params.get("number_ticks", 100)
+
+        self.hunger_to_milk = victory_params.get("hunger_to_milk", 0.5)
+        self.thirst_to_milk = victory_params.get("thirst_to_milk", 0.5)
+
+        self.algorithm_to_farm = algorithm_params.get("to_farm", "dijkstra")
+        
+
 
 
         super().__init__()
@@ -94,7 +103,9 @@ class InterfaceGraphique(tk.Tk):
 
     def tick(self):
         self.nb_tour += 1
-        simulate_tick(self.cows, self.pre, self.nb_tour, self.hunger_evolution, self.thirst_evolution, self.milk_evolution, self.add_hunger, self.add_thirst, self.breeder_salary_evolution) 
+        simulate_tick(self.cows, self.pre, self.nb_tour, self.hunger_evolution, self.thirst_evolution, self.milk_evolution, self.add_hunger, self.add_thirst, self.breeder_salary_evolution, self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm) 
+
+
         self.after(self.number_ticks, self.tick)
 
 
