@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox
+from data.result import create_csv
 from simulation.box import box_creation
 from simulation.cow import Farm
 from simulation.simulate_cow import simulate_tick
+from data.analysis_results import analysis_result
 import json
 
 class InterfaceGraphique(tk.Tk):
@@ -43,11 +45,12 @@ class InterfaceGraphique(tk.Tk):
         self.algorithm_to_farm = algorithm_params.get("to_farm", "dijkstra")
         
 
-
+        self.csv_filepath = create_csv()
 
         super().__init__()
         self.initialize()
         self.start_simulation()
+        
 
     def initialize(self):
         
@@ -92,6 +95,8 @@ class InterfaceGraphique(tk.Tk):
     def start_simulation(self):
         response = messagebox.askyesno("Démarrer la simulation", "Voulez-vous démarrer la simulation ?")
         if response:
+            self.simulation_running = True  # Ajout de l'attribut pour indiquer que la simulation est en cours
+            self.csv_filepath = create_csv()  # Créez le fichier CSV au début de la simulation
             print(f"Nombre de vaches : {len(self.cows)}")
             print(f"vaches : {self.cows}")
             self.tick()
@@ -99,14 +104,23 @@ class InterfaceGraphique(tk.Tk):
             self.destroy()
             exit()
 
+        
+
 
 
     def tick(self):
-        self.nb_tour += 1
-        simulate_tick(self.cows, self.pre, self.nb_tour, self.hunger_evolution, self.thirst_evolution, self.milk_evolution, self.add_hunger, self.add_thirst, self.breeder_salary_evolution, self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm) 
+        if self.simulation_running:
+            self.nb_tour += 1
+            simulate_tick(self.cows, self.pre, self.nb_tour, self.hunger_evolution, self.thirst_evolution, self.milk_evolution, self.add_hunger, self.add_thirst, self.breeder_salary_evolution, self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm, self.csv_filepath)
 
+            # Vérifiez si la simulation est terminée (par exemple, si toutes les vaches sont mortes)
+            if not self.cows:  # ou une autre condition de fin
+                self.simulation_running = False  # Marquez la simulation comme terminée
+                print("analyse du fichier : ", self.csv_filepath)
+                analysis_result(self.csv_filepath)  # Appelez l'analyse des résultats
+            else:
+                self.after(self.number_ticks, self.tick)
 
-        self.after(self.number_ticks, self.tick)
 
 
 if __name__ == "__main__":

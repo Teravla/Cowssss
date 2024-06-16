@@ -1,11 +1,13 @@
-import json
-from datetime import datetime
-from prisma.models import Cow, Farm  # Importez vos modèles Prisma générés
-
 import csv
 import os
+from datetime import datetime
 
-def generate_csv_in_current_directory(filename, cows_data):
+def create_csv(filename=None):
+    # Générer un nom de fichier unique basé sur l'horodatage
+    if filename is None:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+        filename = f'{timestamp}.csv'
+    
     # Obtenir le chemin absolu du répertoire courant
     current_directory = os.path.dirname(os.path.abspath(__file__))
     filepath = os.path.join(current_directory, filename)
@@ -14,36 +16,42 @@ def generate_csv_in_current_directory(filename, cows_data):
         csvwriter = csv.writer(csvfile, delimiter=';')
 
         # En-têtes des colonnes
-        headers = ['ID', 'x', 'y', 'HUNGER', 'THIRST']
+        headers = ['ID', 'x', 'y', 'HUNGER', 'THIRST', 'MILK']
         csvwriter.writerow(headers)
+    
+    return filepath  # Retourner le chemin du fichier pour l'utiliser plus tard
+
+
+def append_to_csv(filepath, cows_data, nb_tour):
+    with open(filepath, 'a', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=';')
 
         # Données par ligne (attributs des vaches par tour)
         for tour in range(len(cows_data)):
             for cow_id in cows_data[tour]:
                 cow = cows_data[tour][cow_id]
                 row_data = [
-                    f'{tour + 1}-{cow_id}',
+                    f'{nb_tour}-{cow_id}',
                     cow['x'],
                     cow['y'],
                     cow['hunger'],
-                    cow['thirst']
+                    cow['thirst'],
+                    cow['milk']
                 ]
                 csvwriter.writerow(row_data)
 
-# Exemple de données des vaches par tour
-cows_data = [
-    {
-        1: {'x': 10, 'y': 5, 'hunger': 80, 'thirst': 70},
-        2: {'x': 15, 'y': 8, 'hunger': 60, 'thirst': 50},
-    },
-    {
-        1: {'x': 11, 'y': 6, 'hunger': 70, 'thirst': 60},
-        2: {'x': 14, 'y': 9, 'hunger': 50, 'thirst': 40},
-    },
-]
 
-# Nom du fichier CSV à générer
-filename = 'cows_data.csv'
+def collect_cow_data(cows, nb_tour, all_cows_data):
+    tour_data = {}
+    for cow in cows:
+        tour_data[cow.id] = {
+            'x': cow.x,
+            'y': cow.y,
+            'hunger': cow.hunger,
+            'thirst': cow.thirst,
+            'milk': cow.milk
+        }
+    all_cows_data[nb_tour] = tour_data
+    return all_cows_data
 
-# Générer le fichier CSV dans le répertoire courant
-generate_csv_in_current_directory(filename, cows_data)
+
