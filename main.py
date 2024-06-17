@@ -16,41 +16,69 @@ class InterfaceGraphique(tk.Tk):
         with open(self.config_file, 'r') as f:
             config_data = json.load(f)
 
-        init_params = config_data.get("init_paramter", {}) 
+        init_params = config_data.get("init_parameter", {}) 
         cow_params = config_data.get("cow_evolution", {})
         victory_params = config_data.get("victory_condition", {})
         algorithm_params = config_data.get("algorithm", {})
+        analysis_params = config_data.get("analysis", {})
+        food_value_params = config_data.get("food_value", [])
 
-        self.square_length = init_params.get("square_lenght", 20)
-        self.nb_square = init_params.get("number_of_squares", 10)
-        self.spacing = init_params.get("spacing", 10)
-        self.number_cows = init_params.get("number_of_cows", 1)
-        self.percentage_water = init_params.get("percentage_water", 0.98)
-        self.hunger_cow = init_params.get("hunger_cow", 50)
-        self.thirst_cow = init_params.get("thirst_cow", 50)
-        self.milk_cow = init_params.get("milk_cow", 0)
-        self.breeder_salary = init_params.get("breeder_salary", 0)
-
-        self.hunger_evolution = cow_params.get("hunger_evolution", 5)
-        self.thirst_evolution = cow_params.get("thirst_evolution", 5)
-        self.milk_evolution = cow_params.get("milk_evolution", 10)
-        self.add_hunger = cow_params.get("add_hunger", 20)
-        self.add_thirst = cow_params.get("add_thirst", 100)
-        self.breeder_salary_evolution = cow_params.get("breeder_salary_evolution", 10)
-        self.number_ticks = init_params.get("number_ticks", 100)
-
-        self.hunger_to_milk = victory_params.get("hunger_to_milk", 0.5)
-        self.thirst_to_milk = victory_params.get("thirst_to_milk", 0.5)
-
-        self.algorithm_to_farm = algorithm_params.get("to_farm", "dijkstra")
+        self.square_length = init_params["square_lenght"]
+        self.nb_square = init_params["number_of_squares"]
+        self.spacing = init_params["spacing"]
+        self.number_cows = init_params["number_of_cows"]
         
+        self.hunger_cow = init_params["hunger_cow"]
+        self.thirst_cow = init_params["thirst_cow"]
+        self.milk_cow = init_params["milk_cow"]
+        self.breeder_salary = init_params["breeder_salary"]
 
-        self.csv_filepath = create_csv()
+        self.hunger_evolution = cow_params["hunger_evolution"]
+        self.thirst_evolution = cow_params["thirst_evolution"]
+        self.milk_evolution = cow_params["milk_evolution"]
+        self.add_hunger = cow_params["add_hunger"]
+        self.add_thirst = cow_params["add_thirst"]
+        self.breeder_salary_evolution = cow_params["breeder_salary_evolution"]
+        self.number_ticks = init_params["number_ticks"]
+
+        self.hunger_to_milk = victory_params["hunger_to_milk"]
+        self.thirst_to_milk = victory_params["thirst_to_milk"]
+
+        self.algorithm_to_farm = algorithm_params["to_farm"]
+
+        self.show_analysis = analysis_params["show_analysis"]
+
+        # Calculer les pourcentages de mixage des aliments
+        self.mix_food_params = self.parse_food_values(food_value_params)
+        print(self.mix_food_params)
+
+        if self.show_analysis:
+            self.csv_filepath = create_csv()
 
         super().__init__()
         self.initialize()
         self.start_simulation()
+
+
+
+    def parse_food_values(self, food_value_params):
+        food_dict = {}
+
+        for item in food_value_params:
+            name = item["Type of Food"]
+            food_value = item["Food Value"]
+            milk_value = item["Milk Value"]
+            cow_lifetime = item["Cow Lifetime"]
+            time_to_recovery = item["Time to Recovery"]
+            color = item["Color"]
+            mix = item["Mix"]
+
+            food_dict[name] = {"color": color, "mix": mix, "food_value": food_value, "milk_value": milk_value, "cow_lifetime": cow_lifetime, "time_to_recovery": time_to_recovery}
+
+        return food_dict
+
         
+
 
     def initialize(self):
         
@@ -62,9 +90,7 @@ class InterfaceGraphique(tk.Tk):
         screen_height = self.winfo_screenheight()
 
         # paramètres des carrés
-        if self.square_length % 2 != 0:
-            self.square_length += 1
-        if self.nb_square % 2 != 0:
+        if self.nb_square % 2 == 0:
             self.nb_square += 1
 
         # Calcul de la taille du canevas
@@ -86,9 +112,9 @@ class InterfaceGraphique(tk.Tk):
 
         self.pre = [[None for _ in range(self.nb_square)] for _ in range(self.nb_square)]  # Grille de nb_square x nb_square pour stocker les cases
 
-        box_creation(self.canvas, self.pre, self.percentage_water, self.square_length, self.spacing)
+        box_creation(self.canvas, self.pre, self.square_length, self.spacing, self.mix_food_params)
 
-        self.farm = Farm(self.canvas, self.pre, self.nb_square, self.number_cows, self.square_length // 2, "black", self.square_length, self.hunger_cow, self.thirst_cow, self.milk_cow, self.breeder_salary)
+        self.farm = Farm(self.canvas, self.pre, self.nb_square, self.number_cows, self.square_length // 2, "black", self.square_length, self.hunger_cow, self.thirst_cow, self.milk_cow, self.breeder_salary, self.spacing)
         self.cows = self.farm.cows
 
 
@@ -96,7 +122,6 @@ class InterfaceGraphique(tk.Tk):
         response = messagebox.askyesno("Démarrer la simulation", "Voulez-vous démarrer la simulation ?")
         if response:
             self.simulation_running = True  # Ajout de l'attribut pour indiquer que la simulation est en cours
-            self.csv_filepath = create_csv()  # Créez le fichier CSV au début de la simulation
             print(f"Nombre de vaches : {len(self.cows)}")
             print(f"vaches : {self.cows}")
             self.tick()
@@ -111,15 +136,27 @@ class InterfaceGraphique(tk.Tk):
     def tick(self):
         if self.simulation_running:
             self.nb_tour += 1
-            simulate_tick(self.cows, self.pre, self.nb_tour, self.hunger_evolution, self.thirst_evolution, self.milk_evolution, self.add_hunger, self.add_thirst, self.breeder_salary_evolution, self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm, self.csv_filepath)
+            csv_filepath = self.csv_filepath if self.show_analysis else None
+            
+            simulate_tick(
+                self.cows, self.pre, self.nb_tour,
+                self.hunger_evolution, self.thirst_evolution, self.milk_evolution,
+                self.add_hunger, self.add_thirst, self.breeder_salary_evolution,
+                self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm,
+                csv_filepath, self.show_analysis, self.mix_food_params
+            )
 
             # Vérifiez si la simulation est terminée (par exemple, si toutes les vaches sont mortes)
-            if not self.cows:  # ou une autre condition de fin
-                self.simulation_running = False  # Marquez la simulation comme terminée
-                print("analyse du fichier : ", self.csv_filepath)
-                analysis_result(self.csv_filepath)  # Appelez l'analyse des résultats
+            if not self.cows:
+                self.simulation_running = False
+                
+                # Affiche l'analyse du fichier CSV si show_analysis est True
+                if self.show_analysis:
+                    print("Analyse du fichier :", self.csv_filepath)
+                    analysis_result(self.csv_filepath)
             else:
                 self.after(self.number_ticks, self.tick)
+
 
 
 

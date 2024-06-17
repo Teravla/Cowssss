@@ -1,10 +1,11 @@
+import random
 import tkinter as tk
 from simulation.algorithm.algorithms import Algorithm
 class Cow:
     # Variable statique pour attribuer un identifiant unique à chaque vache
     cow_id_counter = 0
 
-    def __init__(self, canvas, x, y, radius, color, dim_box, init_thirst, init_hunger, init_milk, farm):
+    def __init__(self, canvas, x, y, radius, color, dim_box, init_thirst, init_hunger, init_milk, farm, spacing):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -13,6 +14,16 @@ class Cow:
         self.dim_box = dim_box
         self.tick_count = 0
         self.path_to_farm = []
+        self.spacing = spacing
+
+        self.color_visit_count = {
+            "green": 0,
+            "yellow": 0,
+            "brown": 0,
+            "orange": 0,
+            "lightgray": 0,
+            "blue": 0,
+        }
 
         # Attributs des besoins de la vache
         self.hunger = init_hunger  # Jauge de faim (0-100)
@@ -32,40 +43,49 @@ class Cow:
         self.draw(self.radius, self.color, self.dim_box)
 
     def draw(self, radius, color, dim_box):
-        # Calcul des coordonnées du centre du cercle
-        center_x = self.x * 30 + dim_box
-        center_y = self.y * 30 + dim_box
-        # Dessin du cercle noir avec l'identifiant de la vache comme étiquette
-        self.circle_id = self.canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill=color)
+            # Calcul des coordonnées du centre du cercle
+            center_x = self.x * (dim_box + self.spacing) + dim_box
+            center_y = self.y * (dim_box + self.spacing) + dim_box
+            # Dessin du cercle noir avec l'identifiant de la vache comme étiquette
+            self.circle_id = self.canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill=color)
+
 
     def update_needs(self, hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk):
-        # Exemple de mise à jour des besoins de la vache
+        # Mise à jour des besoins de la vache
         if self.thirst > 0 and self.hunger > 0:
             self.thirst -= thirst_evolution
             self.hunger -= hunger_evolution
-
-        self.make_milk(milk_evolution, hunger_to_milk, thirst_to_milk)
 
         # Vache meurt si ses jauges sont à 0
         if self.hunger <= 0 or self.thirst <= 0:
             self.alive = False
             self.reason_death = "hunger" if self.hunger <= 0 else "thirst"
-
-    def make_milk(self, milk_evolution, hunger_to_milk, thirst_to_milk):
+        
         if self.alive and self.hunger >= hunger_to_milk and self.thirst >= thirst_to_milk:
-            print(f"Vache {self.id} produit du lait.")
             self.milk += milk_evolution
 
 
-    def find_nearest(self, grid, target_color):
-        for radius in range(1, len(grid)):
-            for dx in range(-radius, radius + 1):
-                for dy in range(-radius, radius + 1):
-                    new_x, new_y = self.x + dx, self.y + dy
-                    if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]):
-                        if grid[new_x][new_y].color == target_color:
-                            return new_x, new_y
-        return None
+    def find_nearest(self, grid, target_colors):
+        if not target_colors:
+            return None
+        
+        chosen_color = random.choice(target_colors)
+        print(f"Vache {self.id} cherche la couleur {chosen_color}.")
+        
+        min_distance = float('inf')
+        nearest_position = None
+
+        for dx in range(-len(grid), len(grid)):
+            for dy in range(-len(grid[0]), len(grid[0])):
+                new_x, new_y = self.x + dx, self.y + dy
+                if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]):
+                    if grid[new_x][new_y].color == chosen_color:
+                        distance = abs(dx) + abs(dy)
+                        if distance < min_distance:
+                            min_distance = distance
+                            nearest_position = (new_x, new_y)
+        
+        return nearest_position
 
     def move(self, dx, dy, grid, cows):
         if self.alive:
@@ -79,14 +99,12 @@ class Cow:
                     self.x = new_x
                     self.y = new_y
                     self.canvas.move(self.circle_id, dx * 30, dy * 30)  # Déplacer le cercle correspondant à la vache
-                else:
-                    print(f"Vache {self.id} ne peut pas se déplacer sur une case occupée par une autre vache.")
             else:
                 print(f"Vache {self.id} ne peut pas se déplacer sur la case bleue.")
                 print(f"La case bleue est à la position ({new_x}, {new_y}) et la vache est à la position ({self.x}, {self.y}).")
                 exit()
 
-    def go_to_farm(self, grid, breeder_salary_evolution, algorithm):
+    def go_to_farm(self, grid, breeder_salary_evolution, algorithm, mix_food_params):
         if self.alive:
             if not self.path_to_farm:  # Calcule le chemin seulement si nécessaire
                 if algorithm == 'astar':
@@ -105,6 +123,17 @@ class Cow:
                     return
 
                 if self.x == 0 and self.y == len(grid[0]) // 2:
+                    print(f"Vache {self.id} est arrivée à la ferme.")
+                    print(self.color_visit_count)
+                    for color, count in self.color_visit_count.items():
+                        if color in mix_food_params:
+                            quality = mix_food_params[color]["mix"]
+                            food_value = mix_food_params[color]["food_value"]
+                            milk_value = mix_food_params[color]["milk_value"]
+                            # Calculer le résultat
+                            result = count * quality * (food_value + milk_value)
+                            print(f"Résultat pour {color}: {result}")
+                    
                     self.number_milking += 1
                     self.farm.breeder_salary += breeder_salary_evolution
                     self.milk = 0
@@ -113,56 +142,48 @@ class Cow:
                     self.path_to_farm = []  # Réinitialise le chemin après l'arrivée
 
 
-    def act(self, grid, nb_tour, hunger_evolution, thirst_evolution, milk_evolution, add_hunger, add_thirst, breeder_salary_evolution, hunger_to_milk, thirst_to_milk, algorithm_to_farm):
 
+    def act(self, grid, hunger_evolution, thirst_evolution, milk_evolution, add_hunger, add_thirst, breeder_salary_evolution, hunger_to_milk, thirst_to_milk, algorithm_to_farm, mix_food_params):
 
-        print(f"Salaire de l'éleveur : {self.farm.breeder_salary}")
         self.tick_count += 1
 
-        if self.number_milking >= 3:
+        if self.number_milking >= 1:
             self.alive = False
             self.reason_death = "milking"
             return
 
         needs_updated = False  # Variable pour suivre si les besoins ont été mis à jour
 
+        food_colors_nb = [food["color"] for food in mix_food_params.values() if food["color"] != "blue"]
+
         if self.alive and (0 <= self.x < len(grid) and 0 <= self.y < len(grid[0])):
-            print(f"Début du tour {nb_tour} Cow {self.id} is acting : hunger={self.hunger}, thirst={self.thirst}, milk={self.milk}")
 
             if self.milk >= 100:
-                print(f"Cow {self.id} is going to the farm.")
-                self.go_to_farm(grid, breeder_salary_evolution, algorithm_to_farm)
-                
-            else:
-                if self.thirst < thirst_to_milk:
-                    print(f"Cow {self.id} drinking water.")
-                    target = self.find_nearest(grid, "blue")
-                    if target:
-                        self.move_towards(target, grid)
-                        self.drink(grid, add_thirst)
-                        needs_updated = True
-                elif self.hunger < hunger_to_milk:
-                    print(f"Cow {self.id} eating grass.")
-                    target = self.find_nearest(grid, "green")
-                    if target:
-                        self.move_towards(target, grid)
-                        self.eating(grid, add_hunger)
-                        needs_updated = True
-                else:
-                    print(f"Cow {self.id} is wandering.")
+                self.go_to_farm(grid, breeder_salary_evolution, algorithm_to_farm, mix_food_params)
+                return  # Sortie anticipée si la vache est en train de traire
+            
+            # Si la vache a soif, chercher la case la plus proche de couleur "blue"
+            if self.thirst < thirst_to_milk:
+                target = self.find_nearest(grid, ["blue"])
+                if target:
+                    self.move_towards(target, grid)
+                    self.drink(grid, add_thirst)
                     needs_updated = True
-
-            if needs_updated:
-                self.update_needs(hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk)
-                print(f"Fin du tour {nb_tour} Cow {self.id} is acting : hunger={self.hunger}, thirst={self.thirst}, milk={self.milk}\n")
-                return
-
-
             
-        
-
-
+            # Sinon, si la vache a faim, chercher la case la plus proche d'une couleur de nourriture
+            elif self.hunger < hunger_to_milk:
+                target = self.find_nearest(grid, food_colors_nb)
+                if target:
+                    self.move_towards(target, grid)
+                    self.eating(grid, add_hunger)
+                    needs_updated = True
             
+            # Si la vache n'a pas besoin de se déplacer, indiquer que les besoins ont été mis à jour
+            else:
+                needs_updated = True
+
+        if needs_updated:
+            self.update_needs(hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk)
 
 
 
@@ -193,25 +214,27 @@ class Cow:
                         return
                         
     def eating(self, grid, add_hunger):
-        if grid[self.x][self.y].color == "green":
+        current_color = grid[self.x][self.y].color
+        if current_color != "blue":
+            self.color_visit_count[current_color] += 1
             self.hunger += add_hunger
-            self.hunger = min(self.hunger, 100)  # Assure que la faim ne dépasse pas 100
-            grid[self.x][self.y].color = "yellow"
-            self.canvas.itemconfig(grid[self.x][self.y].rectangle_id, fill="yellow")  # Met à jour la couleur de la case dans l'interface graphique
-        return 
+            self.hunger = min(self.hunger, 100)
+        return
  
 
 class Farm:
-    def __init__(self, canvas, pre, nb_square, nb_cow, radius, color, dim_box, init_thirst, init_hunger, init_milk, init_salary):
+    def __init__(self, canvas, pre, nb_square, nb_cow, radius, color, dim_box, init_thirst, init_hunger, init_milk, init_salary, spacing):
         self.canvas = canvas
         self.pre = pre
         self.nb_square = nb_square
         self.breeder_salary = init_salary
-        self.cows = self.create_cows(nb_cow, radius, color, dim_box, init_thirst, init_hunger, init_milk)
+        self.spacing = spacing
+        self.cows = self.create_cows(nb_cow, radius, color, dim_box, init_thirst, init_hunger, init_milk, self.spacing)
 
-    def create_cows(self, nb_cow, radius, color, dim_box, init_thirst, init_hunger, init_milk):
-        coo_central_x = self.nb_square // 2
-        coo_central_y = self.nb_square // 2
+
+    def create_cows(self, nb_cow, radius, color, dim_box, init_thirst, init_hunger, init_milk, spacing):
+        coo_central_x = self.nb_square // 2 + 1 
+        coo_central_y = self.nb_square // 2 + 1
 
         # Fonction pour vérifier si une position est valide pour placer une vache
         def is_valid_position(x, y):
@@ -234,8 +257,7 @@ class Farm:
                         new_x, new_y = x + dx, y + dy
                         if is_valid_position(new_x, new_y):
                             x, y = new_x, new_y
-
-                            cow = Cow(self.canvas, x, y, radius, color, dim_box, init_thirst, init_hunger, init_milk, self)
+                            cow = Cow(self.canvas, x, y, radius, color, dim_box, init_thirst, init_hunger, init_milk, self, spacing)
 
                             self.pre[x][y].has_cow = True
                             created_cows.append(cow)  # Ajout de la vache créée à la liste

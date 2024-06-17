@@ -1,10 +1,9 @@
 {
-    "init_paramter" : {
+    "init_parameter" : {
         "square_lenght" : 20,
-        "number_of_squares" : 10,
+        "number_of_squares" : 9,
         "spacing": 10,
         "number_of_cows": 1,
-        "percentage_water": 0.98,
         "hunger_cow": 20,
         "thirst_cow": 20,
         "milk_cow": 0, 
@@ -29,5 +28,72 @@
 
     "algorithm" : {
         "to_farm" : "astar"
-    }
+    }, 
+
+    "analysis" : {
+        "show_analysis" : false
+    }, 
+
+    "food_value" : [
+        {
+            "Type of Food": "Grass",
+            "Food Value": 0,
+            "Milk Value": 50,
+            "Cow Lifetime": 1,
+            "Time to Recovery": 5,
+            "Mix" : 0.5,
+            "Quality": 0.8,
+            "Color": "green"
+        },
+        {
+            "Type of Food": "Corn",
+            "Food Value": 10,
+            "Milk Value": 10,
+            "Cow Lifetime": 2,
+            "Time to Recovery": 5,
+            "Mix" : 0.1,
+            "Quality": 0.2,
+            "Color": "yellow"
+        },
+        {
+            "Type of Food": "Soybean",
+            "Food Value": 50,
+            "Milk Value": 45,
+            "Cow Lifetime": 5,
+            "Time to Recovery": 5,
+            "Mix" : 0.1,
+            "Quality": 0.65,
+            "Color": "brown"
+        },
+        {
+            "Type of Food": "Fodder",
+            "Food Value": 30,
+            "Milk Value": 30,
+            "Cow Lifetime": 3,
+            "Time to Recovery": 5,
+            "Mix" : 0.1, 
+            "Quality": 0.3,
+            "Color": "orange"
+        },
+        {
+            "Type of Food": "Cereal",
+            "Food Value": 20,
+            "Milk Value": 35,
+            "Cow Lifetime": 3,
+            "Time to Recovery": 5,
+            "Mix" : 0.15,
+            "Quality": 0.4,
+            "Color": "lightgray"
+        },
+        {
+            "Type of Food": "Water",
+            "Food Value": 0,
+            "Milk Value": 0,
+            "Cow Lifetime": 1,
+            "Time to Recovery": 5,
+            "Mix" : 0.05,
+            "Quality": 1,
+            "Color": "blue"
+        }
+    ]
 }

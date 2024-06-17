@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 def analysis_result(filepath):
     data = {}  # Dictionnaire pour stocker toutes les données par ID
     ids = []   # Liste pour stocker les IDs dans l'ordre de lecture
-    attributes = ['x', 'y', 'HUNGER', 'THIRST', 'MILK']  # Attributs à analyser
+    attributes = ['HUNGER', 'THIRST', 'MILK']  # Attributs à analyser
 
     # Lecture du fichier CSV
     with open(filepath, 'r', newline='') as csvfile:
