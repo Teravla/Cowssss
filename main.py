@@ -67,13 +67,13 @@ class InterfaceGraphique(tk.Tk):
             name = item["Type of Food"]
             food_value = item["Food Value"]
             milk_value = item["Milk Value"]
-            cow_lifetime = item["Cow Lifetime"]
+            food_lifetime = item["Food Lifetime"]
             time_to_recovery = item["Time to Recovery"]
             color = item["Color"]
             mix = item["Mix"]
             quality = item["Quality"]
 
-            food_dict[name] = {"color": color, "mix": mix, "food_value": food_value, "milk_value": milk_value, "cow_lifetime": cow_lifetime, "time_to_recovery": time_to_recovery, "quality": quality}
+            food_dict[name] = {"color": color, "mix": mix, "food_value": food_value, "milk_value": milk_value, "food_lifetime": food_lifetime, "time_to_recovery": time_to_recovery, "quality": quality}
 
         return food_dict
 
@@ -114,7 +114,7 @@ class InterfaceGraphique(tk.Tk):
 
         box_creation(self.canvas, self.pre, self.square_length, self.spacing, self.mix_food_params)
 
-        self.farm = Farm(self.canvas, self.pre, self.nb_square, self.number_cows, self.square_length // 2, "black", self.square_length, self.hunger_cow, self.thirst_cow, self.milk_cow, self.breeder_salary, self.spacing)
+        self.farm = Farm(self.canvas, self.pre, self.nb_square, self.number_cows, self.square_length // 2, "white", self.square_length, self.hunger_cow, self.thirst_cow, self.milk_cow, self.breeder_salary, self.spacing)
         self.cows = self.farm.cows
 
 

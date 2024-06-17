@@ -44,6 +44,10 @@ class Cow:
 
         self.draw(self.radius, self.color, self.dim_box)
 
+    def get_breeder_salary(self):
+        return self.farm.breeder_salary
+
+
     def draw(self, radius, color, dim_box):
             # Calcul des coordonnées du centre du cercle
             center_x = self.x * (dim_box + self.spacing) + dim_box
@@ -199,7 +203,7 @@ class Cow:
                 target = self.find_nearest(grid, food_colors_nb)
                 if target:
                     self.move_towards(target, grid)
-                    self.eating(grid, add_hunger)
+                    self.eating(grid, add_hunger, mix_food_params)
                     needs_updated = True
             
             # Si la vache n'a pas besoin de se déplacer, indiquer que les besoins ont été mis à jour
@@ -208,6 +212,18 @@ class Cow:
 
         if needs_updated:
             self.update_needs(hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk)
+        
+
+        # Met à jour les couleurs des cases
+        for row in grid:
+            for box in row:
+                box.update_color()
+                if box.buffer_after_eating == 0 and self.color == "black":
+                    self.farm.breeder_salary -= 10
+                    box.recolor("yellow")
+
+
+        
 
 
 
@@ -237,13 +253,33 @@ class Cow:
                         self.thirst = add_thirst
                         return
                         
-    def eating(self, grid, add_hunger):
-        current_color = grid[self.x][self.y].color
-        if current_color != "blue" and current_color != "gray":
-            self.color_visit_count[current_color] += 1
+    def eating(self, grid, add_hunger, mix_food_params):
+        current_box = grid[self.x][self.y]
+
+        if current_box.color not in ["blue", "gray", "black"]:
+            self.color_visit_count[current_box.color] += 1
             self.hunger += add_hunger
             self.hunger = min(self.hunger, 100)
+
+            if current_box.food_lifetime > 0:
+                current_box.food_lifetime -= 1
+                if current_box.food_lifetime == 0:
+                    food_type = None
+                    for key, value in mix_food_params.items():
+                        if value["color"] == current_box.color:
+                            food_type = key
+                            break
+
+                    if food_type is not None:
+                        current_box.buffer_after_eating = mix_food_params[food_type]['time_to_recovery']
+                    else:
+                        print(f"Error: Food type not found for color {current_box.color}")
+
+                    current_box.set_color("black")
         return
+
+
+
  
 
 class Farm:
