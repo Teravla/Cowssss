@@ -41,7 +41,7 @@
             "Milk Value": 50,
             "Cow Lifetime": 1,
             "Time to Recovery": 5,
-            "Mix" : 0.5,
+            "Mix" : 0.2,
             "Quality": 0.8,
             "Color": "green"
         },
@@ -51,7 +51,7 @@
             "Milk Value": 10,
             "Cow Lifetime": 2,
             "Time to Recovery": 5,
-            "Mix" : 0.1,
+            "Mix" : 0.2,
             "Quality": 0.2,
             "Color": "yellow"
         },
@@ -61,7 +61,7 @@
             "Milk Value": 45,
             "Cow Lifetime": 5,
             "Time to Recovery": 5,
-            "Mix" : 0.1,
+            "Mix" : 0.2,
             "Quality": 0.65,
             "Color": "brown"
         },
@@ -71,7 +71,7 @@
             "Milk Value": 30,
             "Cow Lifetime": 3,
             "Time to Recovery": 5,
-            "Mix" : 0.1, 
+            "Mix" : 0.2, 
             "Quality": 0.3,
             "Color": "orange"
         },

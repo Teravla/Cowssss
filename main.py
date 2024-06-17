@@ -50,7 +50,6 @@ class InterfaceGraphique(tk.Tk):
 
         # Calculer les pourcentages de mixage des aliments
         self.mix_food_params = self.parse_food_values(food_value_params)
-        print(self.mix_food_params)
 
         if self.show_analysis:
             self.csv_filepath = create_csv()
@@ -72,8 +71,9 @@ class InterfaceGraphique(tk.Tk):
             time_to_recovery = item["Time to Recovery"]
             color = item["Color"]
             mix = item["Mix"]
+            quality = item["Quality"]
 
-            food_dict[name] = {"color": color, "mix": mix, "food_value": food_value, "milk_value": milk_value, "cow_lifetime": cow_lifetime, "time_to_recovery": time_to_recovery}
+            food_dict[name] = {"color": color, "mix": mix, "food_value": food_value, "milk_value": milk_value, "cow_lifetime": cow_lifetime, "time_to_recovery": time_to_recovery, "quality": quality}
 
         return food_dict
 
@@ -122,8 +122,6 @@ class InterfaceGraphique(tk.Tk):
         response = messagebox.askyesno("Démarrer la simulation", "Voulez-vous démarrer la simulation ?")
         if response:
             self.simulation_running = True  # Ajout de l'attribut pour indiquer que la simulation est en cours
-            print(f"Nombre de vaches : {len(self.cows)}")
-            print(f"vaches : {self.cows}")
             self.tick()
         else:
             self.destroy()
@@ -154,6 +152,9 @@ class InterfaceGraphique(tk.Tk):
                 if self.show_analysis:
                     print("Analyse du fichier :", self.csv_filepath)
                     analysis_result(self.csv_filepath)
+                else:
+                    
+                    exit()
             else:
                 self.after(self.number_ticks, self.tick)
 

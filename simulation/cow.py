@@ -1,5 +1,7 @@
 import random
 import tkinter as tk
+
+from numpy import average
 from simulation.algorithm.algorithms import Algorithm
 class Cow:
     # Variable statique pour attribuer un identifiant unique à chaque vache
@@ -70,7 +72,6 @@ class Cow:
             return None
         
         chosen_color = random.choice(target_colors)
-        print(f"Vache {self.id} cherche la couleur {chosen_color}.")
         
         min_distance = float('inf')
         nearest_position = None
@@ -123,23 +124,46 @@ class Cow:
                     return
 
                 if self.x == 0 and self.y == len(grid[0]) // 2:
-                    print(f"Vache {self.id} est arrivée à la ferme.")
                     print(self.color_visit_count)
+                    # Correspondance couleur-nourriture
+                    color_to_food = {v['color']: k for k, v in mix_food_params.items()}
+
+                    # Trouver la qualité minimale parmi les couleurs visitées
+                    min_quality = min(
+                        mix_food_params[color_to_food[color]]['quality']
+                        for color in self.color_visit_count if color in color_to_food
+                    )
+
+                    total_result = 0
+                    visited_colors_count = -1
+
                     for color, count in self.color_visit_count.items():
-                        if color in mix_food_params:
-                            quality = mix_food_params[color]["mix"]
-                            food_value = mix_food_params[color]["food_value"]
-                            milk_value = mix_food_params[color]["milk_value"]
+                        if color in color_to_food:
+                            food_type = color_to_food[color]
+                            milk_value = mix_food_params[food_type]["milk_value"]
                             # Calculer le résultat
-                            result = count * quality * (food_value + milk_value)
-                            print(f"Résultat pour {color}: {result}")
-                    
+                            result = count * milk_value * min_quality
+                            total_result += result
+                            visited_colors_count += 1
+
+
+                    # Calculer le résultat moyen
+                    if visited_colors_count > 0:
+                        average_result = total_result / visited_colors_count
+                    else:
+                        average_result = 0
+
+                    # Calculer le salaire pour cette vache
+                    cow_salary = average_result * 100
+
                     self.number_milking += 1
                     self.farm.breeder_salary += breeder_salary_evolution
                     self.milk = 0
                     self.hunger = 20
                     self.thirst = 20
                     self.path_to_farm = []  # Réinitialise le chemin après l'arrivée
+
+
 
 
 
@@ -215,7 +239,7 @@ class Cow:
                         
     def eating(self, grid, add_hunger):
         current_color = grid[self.x][self.y].color
-        if current_color != "blue":
+        if current_color != "blue" and current_color != "gray":
             self.color_visit_count[current_color] += 1
             self.hunger += add_hunger
             self.hunger = min(self.hunger, 100)
