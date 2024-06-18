@@ -4,11 +4,11 @@
         "number_of_squares" : 9,
         "spacing": 10,
         "number_of_cows": 1,
-        "hunger_cow": 20,
+        "hunger_cow": 40,
         "thirst_cow": 20,
         "milk_cow": 0, 
-        "breeder_salary" : 0,
-        "number_ticks" : 50
+        "breeder_salary" : 100,
+        "number_ticks" : 500
     }, 
     "victory_condition" : {
         "breeder_salary" : 1000,
@@ -18,7 +18,7 @@
     },
 
     "cow_evolution" : {
-        "hunger_evolution" : 5,
+        "hunger_evolution" : 10,
         "thirst_evolution" : 5,
         "add_hunger" : 20,
         "add_thirst" : 100,

@@ -218,9 +218,24 @@ class Cow:
         for row in grid:
             for box in row:
                 box.update_color()
-                if box.buffer_after_eating == 0 and self.color == "black":
-                    self.farm.breeder_salary -= 10
-                    box.recolor("yellow")
+                if box.time_to_recovery == 0 and box.color == "black":
+                    
+                    choice_color = "yellow"
+                    
+                    # Chercher les paramètres associés à la couleur choisie
+                    for food_type, params in mix_food_params.items():
+                        if params["color"] == choice_color:
+                            food_value = params["food_value"]
+                            food_lifetime = params["food_lifetime"]
+                            
+                            # Réduire le salaire de l'éleveur par food_value de la couleur choisie
+                            if self.farm.breeder_salary >= food_value:
+                                self.farm.breeder_salary -= food_value
+                                box.recolor(choice_color, food_lifetime)
+                            break  # Sortir de la boucle une fois que nous avons trouvé et traité la couleur choisie
+
+
+                    
 
 
         
@@ -256,26 +271,14 @@ class Cow:
     def eating(self, grid, add_hunger, mix_food_params):
         current_box = grid[self.x][self.y]
 
-        if current_box.color not in ["blue", "gray", "black"]:
+        if current_box.color not in ["blue", "gray", "black"] and current_box.food_lifetime > 0:
             self.color_visit_count[current_box.color] += 1
             self.hunger += add_hunger
             self.hunger = min(self.hunger, 100)
+            current_box.food_lifetime -= 1
 
-            if current_box.food_lifetime > 0:
-                current_box.food_lifetime -= 1
-                if current_box.food_lifetime == 0:
-                    food_type = None
-                    for key, value in mix_food_params.items():
-                        if value["color"] == current_box.color:
-                            food_type = key
-                            break
-
-                    if food_type is not None:
-                        current_box.buffer_after_eating = mix_food_params[food_type]['time_to_recovery']
-                    else:
-                        print(f"Error: Food type not found for color {current_box.color}")
-
-                    current_box.set_color("black")
+            if current_box.food_lifetime == 0:
+                current_box.set_color("black")
         return
 
 

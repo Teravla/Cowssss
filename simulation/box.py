@@ -2,7 +2,7 @@ import random
 import tkinter as tk
 
 class Box:
-    def __init__(self, canvas, x, y, color, food_lifetime, buffer):
+    def __init__(self, canvas, x, y, color, food_lifetime, time_to_recovery):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -11,17 +11,21 @@ class Box:
         self.has_cow = False
         self.rectangle_id = None  # Identifiant du rectangle dans l'interface graphique
         self.text_id = None  # Identifiant du texte affichant food_lifetime
-        self.buffer_after_eating = buffer
+        self.time_to_recovery = time_to_recovery
 
     def update_color(self):
         # Mettre uniquement à jour le texte sur les cases
         self.canvas.itemconfig(self.text_id, text=str(self.food_lifetime))
-        if self.buffer_after_eating > 0 and self.color == "black":
-            self.buffer_after_eating -= 1
+        if self.time_to_recovery > 0 and self.color == "black":
+            self.time_to_recovery -= 1
     
-    def recolor(self, color):
+    def recolor(self, color, food_lifetime):
         self.color = color
-        self.canvas.itemconfig(self.rectangle_id, fill=self.color)  # Met à jour la couleur de la case dans l'interface graphique
+        self.food_lifetime = food_lifetime
+        self.time_to_recovery = -1
+        self.canvas.itemconfig(self.rectangle_id, fill=self.color)
+        if self.text_id is not None:
+            self.canvas.itemconfig(self.text_id, text=str(self.food_lifetime))
 
             
 
@@ -41,7 +45,8 @@ def colorized_box(mix_food_params, nb_square_per_line):
         count = int(total_squares * mix_ratio)
         color = params["color"]
         food_lifetime = params["food_lifetime"]
-        colors.extend([(color, food_lifetime)] * count)
+        time_to_recovery = params["time_to_recovery"]
+        colors.extend([(color, food_lifetime, time_to_recovery)] * count)
     
     random.shuffle(colors)
     return colors
@@ -55,10 +60,10 @@ def box_creation(canvas, pre, square_length, spacing, mix_food_params):
             x0, y0 = i * (square_length + spacing) + spacing, j * (square_length + spacing) + spacing  # Position de départ de la case avec un espacement
             x1, y1 = x0 + square_length, y0 + square_length  # Taille de la case
             if i == 0 and j == nb_square // 2:
-                box = Box(canvas, i, j, color="gray", food_lifetime=float('inf'), buffer=-1)
+                box = Box(canvas, i, j, color="gray", food_lifetime=float('inf'), time_to_recovery=-1)
             else:
-                color, food_lifetime = colored_boxes.pop(0)
-                box = Box(canvas, i, j, color, food_lifetime, buffer=-1)
+                color, food_lifetime, time_to_recovery = colored_boxes.pop(0)
+                box = Box(canvas, i, j, color, food_lifetime, time_to_recovery)
             
             box.rectangle_id = canvas.create_rectangle(x0, y0, x1, y1, fill=box.color)  # Stocke l'identifiant du rectangle
             
