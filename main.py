@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import messagebox
 from data.result import create_csv
@@ -8,7 +9,12 @@ from data.analysis_results import analysis_result
 import json
 
 class InterfaceGraphique(tk.Tk):
-    def __init__(self, file: str = "./config.json"):
+    """
+    This class is used to create the graphical interface of the simulation.
+    """
+
+
+    def __init__(self, file: str = "./config.json") -> None:
         self.nb_tour = 0
         self.config_file = file
 
@@ -59,8 +65,11 @@ class InterfaceGraphique(tk.Tk):
         self.start_simulation()
 
 
+    def parse_food_values(self, food_value_params: list[dict[str, str | int | float]]) -> dict[str, dict[str, str | int | float]]:
+        """
+        This method is used to parse the food values from the JSON file.
+        """
 
-    def parse_food_values(self, food_value_params):
         food_dict = {}
 
         for item in food_value_params:
@@ -73,16 +82,24 @@ class InterfaceGraphique(tk.Tk):
             mix = item["Mix"]
             quality = item["Quality"]
 
-            food_dict[name] = {"color": color, "mix": mix, "food_value": food_value, "milk_value": milk_value, "food_lifetime": food_lifetime, "time_to_recovery": time_to_recovery, "quality": quality}
+            food_dict[name] = {
+                "color": color,
+                "mix": mix,
+                "food_value": food_value,
+                "milk_value": milk_value,
+                "food_lifetime": food_lifetime,
+                "time_to_recovery": time_to_recovery,
+                "quality": quality
+            }
 
         return food_dict
 
+
+    def initialize(self) -> None:
+        """
+        This method is used to initialize the graphical interface.
+        """
         
-
-
-    def initialize(self):
-        
-
         self.title("Simulation de vaches")
 
         # Détermination de la taille de l'écran et du canevas
@@ -98,8 +115,8 @@ class InterfaceGraphique(tk.Tk):
         canvas_height = self.nb_square * (self.square_length + self.spacing) + self.spacing
 
         # Calcul du positionnement pour centrer la fenêtre
-        window_width = canvas_width + 20  # Largeur de la fenêtre
-        window_height = canvas_height + 20 # Hauteur de la fenêtre
+        window_width = canvas_width + 20
+        window_height = canvas_height + 20
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
 
@@ -118,20 +135,25 @@ class InterfaceGraphique(tk.Tk):
         self.cows = self.farm.cows
 
 
-    def start_simulation(self):
+    def start_simulation(self) -> None:
+        """
+        This method is used to start the simulation.
+        """
+
         response = messagebox.askyesno("Démarrer la simulation", "Voulez-vous démarrer la simulation ?")
         if response:
-            self.simulation_running = True  # Ajout de l'attribut pour indiquer que la simulation est en cours
+            self.simulation_running = True 
             self.tick()
         else:
             self.destroy()
             exit()
 
+
+    def tick(self) -> None:
+        """
+        This method is used to simulate a tick of the simulation.
+        """
         
-
-
-
-    def tick(self):
         if self.simulation_running:
             self.nb_tour += 1
             csv_filepath = self.csv_filepath if self.show_analysis else None
@@ -139,16 +161,14 @@ class InterfaceGraphique(tk.Tk):
             simulate_tick(
                 self.cows, self.pre, self.nb_tour,
                 self.hunger_evolution, self.thirst_evolution, self.milk_evolution,
-                self.add_hunger, self.add_thirst, self.breeder_salary_evolution,
+                self.add_hunger, self.add_thirst,
                 self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm,
                 csv_filepath, self.show_analysis, self.mix_food_params
             )
 
-            # Vérifiez si la simulation est terminée (par exemple, si toutes les vaches sont mortes)
             if not self.cows:
                 self.simulation_running = False
                 
-                # Affiche l'analyse du fichier CSV si show_analysis est True
                 if self.show_analysis:
                     print("Analyse du fichier :", self.csv_filepath)
                     analysis_result(self.csv_filepath)
@@ -157,7 +177,6 @@ class InterfaceGraphique(tk.Tk):
                     exit()
             else:
                 self.after(self.number_ticks, self.tick)
-
 
 
 

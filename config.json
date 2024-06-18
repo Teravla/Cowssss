@@ -8,7 +8,7 @@
         "thirst_cow": 20,
         "milk_cow": 0, 
         "breeder_salary" : 100,
-        "number_ticks" : 500
+        "number_ticks" : 50
     }, 
     "victory_condition" : {
         "breeder_salary" : 1000,
