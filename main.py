@@ -14,7 +14,7 @@ class InterfaceGraphique(tk.Tk):
     """
 
 
-    def __init__(self, file: str = "./config.json") -> None:
+    def __init__(self, file: str, NN: bool) -> None:
         self.nb_tour = 0
         self.config_file = file
 
@@ -44,7 +44,6 @@ class InterfaceGraphique(tk.Tk):
         self.milk_evolution = cow_params["milk_evolution"]
         self.add_hunger = cow_params["add_hunger"]
         self.add_thirst = cow_params["add_thirst"]
-        self.breeder_salary_evolution = cow_params["breeder_salary_evolution"]
         self.number_ticks = init_params["number_ticks"]
 
         self.hunger_to_milk = victory_params["hunger_to_milk"]
@@ -59,6 +58,8 @@ class InterfaceGraphique(tk.Tk):
 
         if self.show_analysis:
             self.csv_filepath = create_csv()
+
+        self.NN = NN
 
         super().__init__()
         self.initialize()
@@ -140,13 +141,27 @@ class InterfaceGraphique(tk.Tk):
         This method is used to start the simulation.
         """
 
-        response = messagebox.askyesno("Démarrer la simulation", "Voulez-vous démarrer la simulation ?")
-        if response:
+        if self.NN:
+            response = messagebox.askyesno("Démarrer la simulation", "Voulez-vous démarrer la simulation ?")
+            if response:
+                self.simulation_running = True 
+                self.tick()
+            else:
+                self.destroy()
+                exit()
+        else:
             self.simulation_running = True 
             self.tick()
-        else:
-            self.destroy()
-            exit()
+
+    
+    def get_breeder_salary(self) -> float:
+        """
+        This method is used to get the breeder salary.
+        """
+
+        print(f"Le salaire du fermier est de {self.breeder_salary} dans main.py")
+        return self.breeder_salary
+    
 
 
     def tick(self) -> None:
@@ -158,13 +173,13 @@ class InterfaceGraphique(tk.Tk):
             self.nb_tour += 1
             csv_filepath = self.csv_filepath if self.show_analysis else None
             
-            simulate_tick(
+            self.breeder_salary = simulate_tick(
                 self.cows, self.pre, self.nb_tour,
                 self.hunger_evolution, self.thirst_evolution, self.milk_evolution,
                 self.add_hunger, self.add_thirst,
                 self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm,
-                csv_filepath, self.show_analysis, self.mix_food_params
-            )
+                csv_filepath, self.show_analysis, self.mix_food_params, self.breeder_salary
+            ) if simulate_tick(self.cows, self.pre, self.nb_tour, self.hunger_evolution, self.thirst_evolution, self.milk_evolution, self.add_hunger, self.add_thirst, self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm, csv_filepath, self.show_analysis, self.mix_food_params, self.breeder_salary) is not None else -1
 
             if not self.cows:
                 self.simulation_running = False
@@ -172,14 +187,16 @@ class InterfaceGraphique(tk.Tk):
                 if self.show_analysis:
                     print("Analyse du fichier :", self.csv_filepath)
                     analysis_result(self.csv_filepath)
-                else:
-                    
-                    exit()
+                
+                self.after(self.number_ticks, self.tick)
             else:
                 self.after(self.number_ticks, self.tick)
-
+        else:
+            self.destroy()
+            exit()
 
 
 if __name__ == "__main__":
-    app = InterfaceGraphique()
+    app = InterfaceGraphique("config.json", True)
     app.mainloop()
+

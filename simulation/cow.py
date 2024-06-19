@@ -48,6 +48,13 @@ class Cow:
 
         self.draw(self.radius, self.color, self.dim_box)
 
+    def get_breeder_salary(self) -> float:
+        """
+        This method is used to get the breeder salary of the farm.
+        """
+        print(f"Le salaire de l'éleveur pour la vache {self.id} est de {self.farm.breeder_salary} dans cows.py.")
+        return self.farm.breeder_salary
+
 
     def draw(self, radius: float, color: str, dim_box: int) -> None:
             """
@@ -149,7 +156,6 @@ class Cow:
                     return
 
                 if self.x == 0 and self.y == len(grid[0]) // 2:
-                    print(self.color_visit_count)
                     # Correspondance couleur-nourriture
                     color_to_food = {v['color']: k for k, v in mix_food_params.items()}
 
@@ -203,7 +209,6 @@ class Cow:
         needs_updated = False  # Variable pour suivre si les besoins ont été mis à jour
 
         food_colors_nb: List[str] = [food["color"] for food in mix_food_params.values() if isinstance(food["color"], str) and food["color"] != "blue"]
-        print(f"food_colors_nb: {food_colors_nb}")
 
         if self.alive and (0 <= self.x < len(grid) and 0 <= self.y < len(grid[0])):
 

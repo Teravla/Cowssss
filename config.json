@@ -1,47 +1,43 @@
 {
-    "init_parameter" : {
-        "square_lenght" : 20,
-        "number_of_squares" : 9,
+    "init_parameter": {
+        "square_lenght": 20,
+        "number_of_squares": 9,
         "spacing": 10,
         "number_of_cows": 1,
         "hunger_cow": 40,
         "thirst_cow": 20,
-        "milk_cow": 0, 
-        "breeder_salary" : 100,
-        "number_ticks" : 50
-    }, 
-    "victory_condition" : {
-        "breeder_salary" : 1000,
-        "milkings_time" : 2,
-        "thirst_to_milk" : 80,
-        "hunger_to_milk" : 80
+        "milk_cow": 0,
+        "breeder_salary": 100,
+        "number_ticks": 50
     },
-
-    "cow_evolution" : {
-        "hunger_evolution" : 10,
-        "thirst_evolution" : 5,
-        "add_hunger" : 20,
-        "add_thirst" : 100,
-        "milk_evolution" : 10,
-        "breeder_salary_evolution" : 10
-    }, 
-
-    "algorithm" : {
-        "to_farm" : "astar"
-    }, 
-
-    "analysis" : {
-        "show_analysis" : false
-    }, 
-
-    "food_value" : [
+    "victory_condition": {
+        "breeder_salary": 1000,
+        "milkings_time": 2,
+        "thirst_to_milk": 80,
+        "hunger_to_milk": 80
+    },
+    "cow_evolution": {
+        "hunger_evolution": 10,
+        "thirst_evolution": 5,
+        "add_hunger": 20,
+        "add_thirst": 100,
+        "milk_evolution": 10,
+        "breeder_salary_evolution": 10
+    },
+    "algorithm": {
+        "to_farm": "astar"
+    },
+    "analysis": {
+        "show_analysis": false
+    },
+    "food_value": [
         {
             "Type of Food": "Grass",
             "Food Value": 0,
             "Milk Value": 50,
             "Food Lifetime": 1,
             "Time to Recovery": 5,
-            "Mix" : 0.2,
+            "Mix": 0.2,
             "Quality": 0.8,
             "Color": "green"
         },
@@ -51,7 +47,7 @@
             "Milk Value": 10,
             "Food Lifetime": 2,
             "Time to Recovery": 5,
-            "Mix" : 0.2,
+            "Mix": 0.2,
             "Quality": 0.2,
             "Color": "yellow"
         },
@@ -61,7 +57,7 @@
             "Milk Value": 45,
             "Food Lifetime": 5,
             "Time to Recovery": 5,
-            "Mix" : 0.2,
+            "Mix": 0.2,
             "Quality": 0.65,
             "Color": "brown"
         },
@@ -71,7 +67,7 @@
             "Milk Value": 30,
             "Food Lifetime": 3,
             "Time to Recovery": 5,
-            "Mix" : 0.2, 
+            "Mix": 0.2,
             "Quality": 0.3,
             "Color": "orange"
         },
@@ -81,7 +77,7 @@
             "Milk Value": 35,
             "Food Lifetime": 3,
             "Time to Recovery": 5,
-            "Mix" : 0.15,
+            "Mix": 0.15,
             "Quality": 0.4,
             "Color": "lightgray"
         },
@@ -91,7 +87,7 @@
             "Milk Value": 0,
             "Food Lifetime": 1,
             "Time to Recovery": 5,
-            "Mix" : 0.05,
+            "Mix": 0.05,
             "Quality": 1,
             "Color": "blue"
         }
