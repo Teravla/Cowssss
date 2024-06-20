@@ -35,5 +35,4 @@ def simulate_tick(cows: List[Cow], grid: List, nb_tour: int, hunger_evolution: i
     if show_analysis:
         append_to_csv(csv_filepath, all_cows_data, nb_tour)
     
-    print(f"Le salaire du fermier est de {breeder_salary} dans simulate_cow.py")
     return breeder_salary

@@ -33,21 +33,43 @@ class Box:
 
     def recolor(self, color: str, food_lifetime: float) -> None:
         """
-        This method is used to recolor the box.
+        This method is used to recolor the box and update the food lifetime text.
         """
-
         self.color = color
         self.food_lifetime = food_lifetime
         self.time_to_recovery = -1
+        
+        # Mettre à jour la couleur du rectangle
         self.canvas.itemconfig(self.rectangle_id, fill=self.color)
-        self.canvas.itemconfig(self.text_id, text=str(self.food_lifetime))
+        
+        # Supprimer l'ancien texte s'il existe
+        if hasattr(self, 'text_id') and self.text_id is not None:
+            print(f"Suppression de l'ancien texte {self.text_id} contenant {self.food_lifetime}")
+            self.canvas.delete(self.text_id)
 
         
+        # Obtenez les coordonnées du rectangle
+        coords = self.canvas.coords(self.rectangle_id)
+        
+        # Vérifiez que les coordonnées sont suffisantes
+        if len(coords) >= 4:
+            x0, y0, x1, y1 = coords[:4]  # Utilisez les deux premiers points du rectangle
+            text_x = x1 - 15  # Déterminez x pour le texte
+            text_y = y0       # Déterminez y pour le texte
+        
+            # Créer un nouveau texte avec le food_lifetime mis à jour
+            self.text_id = self.canvas.create_text(
+                text_x, text_y, text=str(self.food_lifetime), anchor=tk.NE, font=("Helvetica", 6)
+            )
+        else:
+            print("Erreur: Les coordonnées du rectangle ne sont pas suffisantes.")
+
+
     def set_color(self, new_color: str) -> None:
         """
         This method is used to set the color of the box.
         """
-
+        print(f"Changing color of box at {self.x}, {self.y} to {new_color}.")
         self.color = new_color
         self.canvas.itemconfig(self.rectangle_id, fill=self.color)
 
@@ -92,8 +114,12 @@ def box_creation(canvas: tk.Canvas, pre: List, square_length: int, spacing: int,
             box.rectangle_id = canvas.create_rectangle(x0, y0, x1, y1, fill=box.color)  # Stocke l'identifiant du rectangle
             
             if box.color != "gray":
-                text_x = x0 + square_length - 15 
-                text_y = y0 
+                text_x = x0 + square_length - ((0.9 * square_length) - 3)
+                text_y = y0
+                font_size = int((0.1 * square_length) + 4)  # Convertir font_size en int
 
-                box.text_id = canvas.create_text(text_x, text_y, text=str(food_lifetime), anchor=tk.NE, font=("Helvetica", 6))  # Création du texte
+                box.text_id = canvas.create_text(
+                    text_x, text_y, text=str(food_lifetime), anchor=tk.NE, font=("Helvetica", font_size)
+                )  # Création du texte
+
             pre[i][j] = box  # Stockage de la case dans la grille

@@ -15,7 +15,7 @@ class Cow:
         self.canvas = canvas
         self.x = x
         self.y = y
-        self.radius = radius // 1.25
+        self.radius = radius // 1.5
         self.color = color
         self.dim_box = dim_box
         self.tick_count = 0
@@ -52,7 +52,6 @@ class Cow:
         """
         This method is used to get the breeder salary of the farm.
         """
-        print(f"Le salaire de l'éleveur pour la vache {self.id} est de {self.farm.breeder_salary} dans cows.py.")
         return self.farm.breeder_salary
 
 
@@ -61,8 +60,11 @@ class Cow:
             This method is used to draw a cow on the canvas.
             """
 
-            center_x = self.x * (dim_box + self.spacing) + dim_box
-            center_y = self.y * (dim_box + self.spacing) + dim_box
+            alpha = (dim_box + self.spacing) + 1
+            beta = ((0.5 * dim_box) + 8)
+
+            center_x = self.x * alpha + beta
+            center_y = self.y * alpha + beta
             self.circle_id = self.canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill=color)
 
 
@@ -119,6 +121,8 @@ class Cow:
         if self.alive:
             new_x = self.x + dx
             new_y = self.y + dy
+
+            alpha = (self.dim_box + self.spacing)
             
             # Vérifie si la nouvelle position n'est pas une case bleue
             if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and grid[new_x][new_y].color != "blue":
@@ -126,7 +130,7 @@ class Cow:
                 if not any(cow.x == new_x and cow.y == new_y for cow in cows if cow.alive and cow != self):
                     self.x = new_x
                     self.y = new_y
-                    self.canvas.move(self.circle_id, dx * 30, dy * 30)  # Déplacer le cercle correspondant à la vache
+                    self.canvas.move(self.circle_id, dx * alpha, dy * alpha)  # Déplacer le cercle correspondant à la vache
             else:
                 print(f"Vache {self.id} ne peut pas se déplacer sur la case bleue.")
                 print(f"La case bleue est à la position ({new_x}, {new_y}) et la vache est à la position ({self.x}, {self.y}).")
@@ -260,9 +264,10 @@ class Cow:
                             food_lifetime = float(params["food_lifetime"])
 
                             
-                            # Réduire le salaire de l'éleveur par food_value de la couleur choisie
                             if self.farm.breeder_salary >= food_value:
                                 self.farm.breeder_salary -= food_value
+                                # TODO : Changer la couleur de la case en fonction des paramètres de l'IA
+                                food_lifetime = int(food_lifetime)
                                 box.recolor(choice_color, food_lifetime)
                             break  # Sortir de la boucle une fois que nous avons trouvé et traité la couleur choisie
 
@@ -318,6 +323,9 @@ class Cow:
 
             if current_box.food_lifetime == 0:
                 current_box.set_color("black")
+        else: 
+            print(f"La vache {self.id} ne peut pas manger sur la case ({self.x}, {self.y}).")
+
         return
 
 
@@ -342,7 +350,7 @@ class Farm:
         This method is used to create cows in the farm.
         """
         
-        coo_central_x = self.nb_square // 2 + 1 
+        coo_central_x = self.nb_square // 2 + 1
         coo_central_y = self.nb_square // 2 + 1
 
         # Fonction pour vérifier si une position est valide pour placer une vache

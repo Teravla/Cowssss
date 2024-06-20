@@ -1,14 +1,14 @@
 {
     "init_parameter": {
-        "square_lenght": 20,
-        "number_of_squares": 9,
+        "square_lenght": 60,
+        "number_of_squares": 5,
         "spacing": 10,
         "number_of_cows": 1,
         "hunger_cow": 40,
         "thirst_cow": 20,
         "milk_cow": 0,
         "breeder_salary": 100,
-        "number_ticks": 50
+        "number_ticks": 1000
     },
     "victory_condition": {
         "breeder_salary": 1000,
