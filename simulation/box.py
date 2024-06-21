@@ -20,7 +20,7 @@ class Box:
         self.text_id = 0
         self.time_to_recovery = time_to_recovery
         self.square_length = square_length
-
+        
 
     def update_color(self) -> None:
         """
@@ -29,6 +29,7 @@ class Box:
 
         self.canvas.itemconfig(self.text_id, text=str(self.food_lifetime))
         if self.time_to_recovery > 0 and self.color == "black":
+            # print(self.x, self.y, "->", self.time_to_recovery)
             self.time_to_recovery -= 1
 
 
@@ -38,7 +39,7 @@ class Box:
         """
         self.color = color
         self.food_lifetime = food_lifetime
-        self.time_to_recovery = -1
+        self.time_to_recovery = 6
         
         # Mettre à jour la couleur du rectangle
         self.canvas.itemconfig(self.rectangle_id, fill=self.color)
@@ -136,7 +137,7 @@ def box_creation(canvas: tk.Canvas, pre: List, square_length: int, spacing: int,
                 box = Box(canvas, i, j, color="gray", food_lifetime=float('inf'), time_to_recovery=-1, square_length=square_length)
             else:
                 color, food_lifetime, time_to_recovery = colored_boxes.pop(0)
-                box = Box(canvas, i, j, color, food_lifetime, time_to_recovery, square_length)
+                box = Box(canvas, i, j, color, food_lifetime, time_to_recovery + 1, square_length)
             box.rectangle_id = canvas.create_rectangle(x0, y0, x1, y1, fill=box.color)  # Stocke l'identifiant du rectangle
             
             if box.color not in ["blue", "gray"]:

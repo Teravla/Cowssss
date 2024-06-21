@@ -6,7 +6,7 @@ def simulate_tick(
     cows: List[Cow], grid: List, nb_tour: int, hunger_evolution: int, thirst_evolution: int, milk_evolution: int, add_hunger: int, add_thirst: int,
     percentage_hunger: int, percentage_thirst: int, algorithm_to_farm: str, csv_filepath: Optional[str], show_analysis: bool,
     mix_food_params: Dict[str, Dict[str, Union[str, int, float]]], breeder_salary: float,
-    reason_death: List[str], cow_id: List[int]
+    reason_death: List[str], cow_id: List[int], NN: bool, number_of_milkings_to_death: int
 ) -> Tuple[float, List[str], List[int]]:
     """
     Simulate a tick of the simulation.
@@ -14,9 +14,11 @@ def simulate_tick(
     all_cows_data = []
 
     for cow in cows:
-        cow.act(grid, hunger_evolution, thirst_evolution, milk_evolution, add_hunger, add_thirst, percentage_hunger, percentage_thirst, algorithm_to_farm, mix_food_params)
+        cow.act(grid, hunger_evolution, thirst_evolution, milk_evolution, add_hunger, add_thirst, percentage_hunger, percentage_thirst, algorithm_to_farm, mix_food_params, number_of_milkings_to_death)
 
         if not cow.alive:
+            if NN:
+                print(f"ID: {cow.id} - Reason: {cow.reason_death}")
             cows.remove(cow)
             if cow.reason_death is not None:
                 reason_death.append(cow.reason_death)
@@ -35,6 +37,7 @@ def simulate_tick(
         all_cows_data.append(cow_data)
 
         if len(cows) != 0 and cow == cows[-1]:
+            # print("Tour n°", nb_tour)
             cow.recover(grid, mix_food_params)
             current_breeder_salary = cow.get_breeder_salary() if cow.get_breeder_salary() is not None else -2
             breeder_salary = max(breeder_salary, current_breeder_salary)

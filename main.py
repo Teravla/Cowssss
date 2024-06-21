@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import Button, messagebox
 from typing import List
 
 from data.result import create_csv
@@ -15,7 +15,7 @@ class InterfaceGraphique(tk.Tk):
     This class is used to create the graphical interface of the simulation.
     """
 
-    def __init__(self, file: str, NN: bool) -> None:
+    def __init__(self, file: str, NN: bool, step_by_step: bool) -> None:
         super().__init__()  # Initialisation de la classe parente
 
         self.nb_tour = 0
@@ -57,6 +57,7 @@ class InterfaceGraphique(tk.Tk):
 
         self.hunger_to_milk = victory_params["hunger_to_milk"]
         self.thirst_to_milk = victory_params["thirst_to_milk"]
+        self.number_of_milkings_to_death = victory_params["number_of_milkings"]
 
         self.algorithm_to_farm = algorithm_params["to_farm"]
 
@@ -69,6 +70,7 @@ class InterfaceGraphique(tk.Tk):
             self.csv_filepath = create_csv()
 
         self.NN = NN
+        self.step_by_step = step_by_step
         self.cow_reason_death = None
         self.cow_id_death = None   
 
@@ -208,7 +210,7 @@ class InterfaceGraphique(tk.Tk):
                 self.add_hunger, self.add_thirst,
                 self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm,
                 csv_filepath, self.show_analysis, self.mix_food_params, self.breeder_salary,
-                self.cow_reason_death, self.cow_id_death
+                self.cow_reason_death, self.cow_id_death, self.NN, self.number_of_milkings_to_death
             )
 
             self.cow_reason_death = cow_reason_death if cow_reason_death is not None else []
@@ -225,16 +227,38 @@ class InterfaceGraphique(tk.Tk):
                     analysis_result(self.csv_filepath)
                 
             else:
-                self.after(self.number_ticks, self.tick)
+                if not self.step_by_step:
+                    self.after(self.number_ticks, self.tick)
+                else :
+                    self.create_next_turn_button()
 
         # else:
         #     pass
         #     # self.destroy()
         #     # exit()
 
+    def create_next_turn_button(self) -> None:
+        """
+        Create a button to advance to the next turn when in step-by-step mode.
+        """
+        # Créer le bouton
+        self.button = Button(self, text="Tour suivant", command=self.execute_next_turn)
+        self.button.pack()
+
+    def execute_next_turn(self) -> None:
+        """
+        Execute the next turn action when the button is clicked.
+        """
+        # Supprimer le bouton après le clic
+        self.button.destroy()
+
+        # Continuer le tick pour le prochain tour
+        self.tick()
+
+
 
 
 if __name__ == "__main__":
-    app = InterfaceGraphique("config.json", False)
+    app = InterfaceGraphique("config.json", True, False)
     app.mainloop()
 

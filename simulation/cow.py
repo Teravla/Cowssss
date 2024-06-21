@@ -47,6 +47,10 @@ class Cow:
         self.farm = farm  # Référence à l'instance de la ferme
         self.algo = Algorithm()
 
+        self.time_static = 0
+        self.static = False
+
+
         self.draw()
 
     def get_breeder_salary(self) -> float:
@@ -57,22 +61,32 @@ class Cow:
 
 
     def draw(self) -> None:
-            """
-            This method is used to draw a cow on the canvas.
-            """
+        """
+        This method is used to draw a cow on the canvas.
+        """
 
-            alpha = (self.dim_box + self.spacing) + 1
-            beta = (self.spacing - 1) + ((self.dim_box - 1) // 2)
+        alpha = (self.dim_box + self.spacing) + 1
+        beta = (self.spacing - 1) + ((self.dim_box - 1) // 2)
 
-            if self.nb_square == 3:
-                beta += 1
-            else:
-                beta -= (self.nb_square - 5) // 2
-             
+        if self.nb_square == 3:
+            beta += 1
+        else:
+            beta -= (self.nb_square - 5) // 2
 
-            center_x = self.x * alpha + beta
-            center_y = self.y * alpha + beta
-            self.circle_id = self.canvas.create_oval(center_x - self.radius, center_y - self.radius, center_x + self.radius, center_y + self.radius, fill=self.color)
+        center_x = self.x * alpha + beta
+        center_y = self.y * alpha + beta
+        self.circle_id = self.canvas.create_oval(center_x - self.radius, center_y - self.radius, center_x + self.radius, center_y + self.radius, fill=self.color)
+        
+        # Placer l'ID de la vache au centre du cercle
+        self.text_id = self.canvas.create_text(center_x, center_y, text=str(self.id), fill="black", font=("Arial", int(self.radius), "bold"))
+
+    def remove(self) -> None:
+        """
+        This method is used to remove the cow from the canvas.
+        """
+        self.canvas.delete(self.circle_id)
+        self.canvas.delete(self.text_id)
+
 
 
     def update_needs(self, hunger_evolution: int, thirst_evolution: int, milk_evolution: int, hunger_to_milk: int, thirst_to_milk: int) -> None:
@@ -89,6 +103,8 @@ class Cow:
         if self.hunger <= 0 or self.thirst <= 0:
             self.alive = False
             self.reason_death = "hunger" if self.hunger <= 0 else "thirst"
+            if self.thirst <= 0:
+                self.remove()
         
         if self.alive and self.hunger >= hunger_to_milk and self.thirst >= thirst_to_milk:
             self.milk += milk_evolution
@@ -102,35 +118,41 @@ class Cow:
         if not target_colors:
             return None
         
-        chosen_color = random.choice(target_colors)
-        
-        min_distance = float('inf')
-        nearest_position = None
+        while target_colors:
+            chosen_color = random.choice(target_colors)
+            
+            min_distance = float('inf')
+            nearest_position = None
 
-        for dx in range(-len(grid), len(grid)):
-            for dy in range(-len(grid[0]), len(grid[0])):
-                new_x, new_y = self.x + dx, self.y + dy
-                if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]):
-                    if grid[new_x][new_y].color == chosen_color:
-                        distance = abs(dx) + abs(dy)
-                        if distance < min_distance:
-                            min_distance = distance
-                            nearest_position = (new_x, new_y)
-        
-        return nearest_position
+            for dx in range(-len(grid), len(grid)):
+                for dy in range(-len(grid[0]), len(grid[0])):
+                    new_x, new_y = self.x + dx, self.y + dy
+                    if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]):
+                        if grid[new_x][new_y].color == chosen_color:
+                            distance = abs(dx) + abs(dy)
+                            if distance < min_distance:
+                                min_distance = distance
+                                nearest_position = (new_x, new_y)
+
+            if nearest_position:
+                return nearest_position
+
+        # print(f"Vache {self.id} n'a pas pu trouver de position de couleur parmi {target_colors}.")
+        return None
+
 
 
     def move(self, dx: int, dy: int, grid: List, cows: List['Cow']) -> None:
         """
         This method is used to move the cow on the grid.
         """
-        
+
         if self.alive:
             new_x = self.x + dx
             new_y = self.y + dy
 
             alpha = (self.dim_box + self.spacing)
-            
+
             # Vérifie si la nouvelle position n'est pas une case bleue
             if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and grid[new_x][new_y].color != "blue":
                 # Vérifie si la nouvelle position n'est pas déjà occupée par une autre vache
@@ -138,10 +160,48 @@ class Cow:
                     self.x = new_x
                     self.y = new_y
                     self.canvas.move(self.circle_id, dx * alpha, dy * alpha)
+                    self.canvas.move(self.text_id, dx * alpha, dy * alpha)
+                else:
+                    self.find_alternate_position(grid, cows)
+                    return
             else:
                 print(f"Vache {self.id} ne peut pas se déplacer sur la case bleue.")
                 print(f"La case bleue est à la position ({new_x}, {new_y}) et la vache est à la position ({self.x}, {self.y}).")
                 exit()
+        else:
+            print(f"A zombie cow.\nAhhhhh")
+            exit()
+
+
+    def find_alternate_position(self, grid: List, cows: List['Cow']) -> None:
+        """
+        Find an alternate valid position for the cow when the initial move is not possible.
+        """
+
+        has_alternate_position = False
+
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # Droite, Bas, Gauche, Haut
+        for dx, dy in directions:
+            new_x = self.x + dx
+            new_y = self.y + dy
+            if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]):
+                if grid[new_x][new_y].color != "blue" and not any(cow.x == new_x and cow.y == new_y for cow in cows if cow.alive and cow != self):
+                    alpha = (self.dim_box + self.spacing)
+                    self.x = new_x
+                    self.y = new_y
+                    self.canvas.move(self.circle_id, dx * alpha, dy * alpha)
+                    self.canvas.move(self.text_id, dx * alpha, dy * alpha)
+                    has_alternate_position = True
+                    self.time_static = 0
+                    return
+        if not has_alternate_position:
+            # print(f"Vache {self.id} n'a pas pu trouver de position alternative valide.")
+            self.time_static += 1
+
+            if self.time_static > 2:
+                print(f"\n/!\\ {self.id} - {self.thirst} - {self.hunger}\nCow want to go to {new_x} {new_y}")
+
+
 
 
     def go_to_farm(self, grid: List, algorithm: str, mix_food_params: dict[str, dict[str, str | int | float]]) -> None:
@@ -205,17 +265,24 @@ class Cow:
                     self.path_to_farm = []  # Réinitialise le chemin après l'arrivée
 
 
-    def act(self, grid: List, hunger_evolution: int, thirst_evolution: int, milk_evolution: int, add_hunger: int, add_thirst: int, hunger_to_milk: int, thirst_to_milk: int, algorithm_to_farm: str, mix_food_params: dict[str, dict[str, str | int | float]]) -> None:
+    def act(self, grid: List, hunger_evolution: int, thirst_evolution: int, milk_evolution: int, add_hunger: int, add_thirst: int, hunger_to_milk: int, thirst_to_milk: int, algorithm_to_farm: str, mix_food_params: dict[str, dict[str, str | int | float]], number_of_milkings_to_death: int) -> None:
         """
         This method is used to simulate the cow's actions. It's the main method of the Cow class.
         """
 
         self.tick_count += 1
 
-        if self.number_milking >= 1:
+        if self.number_milking >= number_of_milkings_to_death:
             self.alive = False
             self.reason_death = "milking"
+            self.remove()
             return
+        
+        # # Warning 
+        # if self.thirst < 20:
+        #     print(f"Vache {self.id} a soif")
+        # if self.hunger < 20:
+        #     print(f"Vache {self.id} a faim")
 
         needs_updated = False  # Variable pour suivre si les besoins ont été mis à jour
 
@@ -228,7 +295,7 @@ class Cow:
                 return  # Sortie anticipée si la vache est en train de traire
             
             # Si la vache a soif, chercher la case la plus proche de couleur "blue"
-            if self.thirst < thirst_to_milk:
+            if self.thirst < thirst_to_milk and self.hunger > 10:
                 target = self.find_nearest(grid, ["blue"])
                 if target:
                     self.move_towards(target, grid)
@@ -253,7 +320,7 @@ class Cow:
 
     def recover(self, grid: List, mix_food_params: dict[str, dict[str, str | int | float]]) -> None:
         """
-        This method is used to recover the cow.
+        This method is used to recover the boxes on the grid.
         """
 
         # Met à jour les couleurs des cases
@@ -290,6 +357,9 @@ class Cow:
             dx = 1 if target_x > self.x else -1 if target_x < self.x else 0
             dy = 1 if target_y > self.y else -1 if target_y < self.y else 0
 
+            if self.time_static > 2:
+                print(f"\n/!\\ {self.id} - {self.thirst} - {self.hunger}\nCow want to go to {target}")
+
             # Vérifie les mouvements possibles sans se déplacer vers une case bleue
             if 0 <= self.x + dx < len(grid) and 0 <= self.y + dy < len(grid[0]) and grid[self.x + dx][self.y + dy].color != "blue":
                 self.move(dx, dy, grid, self.farm.cows)
@@ -297,6 +367,9 @@ class Cow:
                 self.move(dx, 0, grid, self.farm.cows)
             elif dy != 0 and 0 <= self.y + dy < len(grid[0]) and grid[self.x][self.y + dy].color != "blue":
                 self.move(0, dy, grid, self.farm.cows)
+            else:
+                # print(f"Vache {self.id} ne peut pas se déplacer vers la cible ({target_x}, {target_y}).")
+                self.find_alternate_position(grid, self.farm.cows)
 
 
     def drink(self, grid: List, add_thirst: int) -> None:
@@ -316,6 +389,7 @@ class Cow:
                         return
                         
 
+
     def eating(self, grid: List, add_hunger: int) -> None:
         """
         This method is used to simulate the cow eating food.
@@ -331,8 +405,51 @@ class Cow:
 
             if current_box.food_lifetime == 0:
                 current_box.set_color("black")
+        elif current_box.color == "black":
+
+            if self.hunger < 20:
+                # print(f"Cow {self.id} eat something in neighborhood.")
+                # Essayer de manger une case aléatoire autour de la vache qui ne soit pas bleue, grise ou noire
+                found_food = False
+                max_radius = 1  # Rayon maximal de recherche autour de la vache
+                
+                for radius in range(1, max_radius + 1):
+                    possible_positions = []
+
+                    for dx in range(-radius, radius + 1):
+                        for dy in range(-radius, radius + 1):
+                            if abs(dx) == radius or abs(dy) == radius:
+                                new_x, new_y = self.x + dx, self.y + dy
+                                if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]):
+                                    if (dx != 0 or dy != 0) and grid[new_x][new_y].color not in ["blue", "gray", "black"]:
+                                        possible_positions.append((new_x, new_y))
+
+                    if possible_positions:
+                        random_position = random.choice(possible_positions)
+                        new_x, new_y = random_position
+                        box = grid[new_x][new_y]
+
+                        if box.food_lifetime > 0:
+                            self.color_visit_count[box.color] += 1
+                            self.hunger += add_hunger
+                            self.hunger = min(self.hunger, 100)
+                            box.food_lifetime -= 1
+
+                            if box.food_lifetime == 0:
+                                box.set_color("black")
+
+                            found_food = True
+                            break
+                
+                if not found_food:
+                    print(f"La vache {self.id} n'a pas trouvé de nourriture à proximité.")
+                    print("Case haute ^ : ", grid[self.x - 1][self.y].color)
+                    print("Case basse v : ", grid[self.x + 1][self.y].color)
+                    print("Case gauche < : ", grid[self.x][self.y - 1].color)
+                    print("Case droite > : ", grid[self.x][self.y + 1].color)
 
         return
+
 
 
 
@@ -356,8 +473,8 @@ class Farm:
         This method is used to create cows in the farm.
         """
         
-        coo_central_x = self.nb_square // 2 + 1
-        coo_central_y = self.nb_square // 2 + 1
+        coo_central_x = self.nb_square // 2 
+        coo_central_y = self.nb_square // 2 
 
         # Fonction pour vérifier si une position est valide pour placer une vache
         def is_valid_position(x, y):

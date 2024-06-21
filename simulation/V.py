@@ -33,7 +33,7 @@ class NeuralNetwork:
 
     def start_simulation(self) -> 'InterfaceGraphique':
         print(f"Démarrage de la simulation pour l'instance {self.instance_id}")
-        interface = InterfaceGraphique(self.config_filename, False)
+        interface = InterfaceGraphique(self.config_filename, False, False)
         return interface
 
     def get_breeder_salary(self, interface: 'InterfaceGraphique') -> float:
@@ -86,7 +86,8 @@ def simulate_in_process(config_filename: str, instance_id: int, id_startNN: int)
             reason_death = nn.get_cow_reason_death(interface)
             if cow_id is not None and reason_death is not None:
                 for cow_id, reason_death in zip(cow_id, reason_death):
-                    print(f"I{instance_id} - C{cow_id} - {reason_death}")
+                    if reason_death == "hunger":
+                        print(f"I{instance_id} - C{cow_id} - {reason_death}")
                     # print(f"Cow {cow_id} has died by {reason_death} for the instance {nn.instance_id}")
             nn.write_salary_to_json(salary, id_startNN)
             print("Salaire pour l'instance {} : {:.2f}".format(nn.instance_id, salary))
@@ -141,8 +142,8 @@ class StartNN:
 if __name__ == "__main__":
     config_filename = 'config.json'
     results_filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'results.json'))
-    iterations = 3  # Nombre d'instances à créer
-    nb_cow_init = 1  # Nombre initial de vaches
+    iterations = 100  # Nombre d'instances à créer
+    nb_cow_init = 20  # Nombre initial de vaches
 
     startNN = StartNN(config_filename, iterations, nb_cow_init, results_filename)
     startNN.start()
