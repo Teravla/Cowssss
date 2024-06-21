@@ -198,8 +198,8 @@ class Cow:
             # print(f"Vache {self.id} n'a pas pu trouver de position alternative valide.")
             self.time_static += 1
 
-            if self.time_static > 2:
-                print(f"\n/!\\ {self.id} - {self.thirst} - {self.hunger}\nCow want to go to {new_x} {new_y}")
+            # if self.time_static > 2:
+            #     print(f"\n/!\\ {self.id} - {self.thirst} - {self.hunger}\nCow want to go to {new_x} {new_y}")
 
 
 
@@ -357,8 +357,8 @@ class Cow:
             dx = 1 if target_x > self.x else -1 if target_x < self.x else 0
             dy = 1 if target_y > self.y else -1 if target_y < self.y else 0
 
-            if self.time_static > 2:
-                print(f"\n/!\\ {self.id} - {self.thirst} - {self.hunger}\nCow want to go to {target}")
+            # if self.time_static > 2:
+            #     print(f"\n/!\\ {self.id} - {self.thirst} - {self.hunger}\nCow want to go to {target}")
 
             # Vérifie les mouvements possibles sans se déplacer vers une case bleue
             if 0 <= self.x + dx < len(grid) and 0 <= self.y + dy < len(grid[0]) and grid[self.x + dx][self.y + dy].color != "blue":
@@ -441,12 +441,30 @@ class Cow:
                             found_food = True
                             break
                 
-                if not found_food:
-                    print(f"La vache {self.id} n'a pas trouvé de nourriture à proximité.")
-                    print("Case haute ^ : ", grid[self.x - 1][self.y].color)
-                    print("Case basse v : ", grid[self.x + 1][self.y].color)
-                    print("Case gauche < : ", grid[self.x][self.y - 1].color)
-                    print("Case droite > : ", grid[self.x][self.y + 1].color)
+                # if not found_food:
+                #     print(f"La vache {self.id} n'a pas trouvé de nourriture à proximité.")
+                    
+                #     # Vérifier les cases autour de la vache
+                #     if self.x - 1 >= 0:
+                #         print("Case haute ^ : ", grid[self.x - 1][self.y].color)
+                #     else:
+                #         print("Case haute ^ : Bord de la grille")
+
+                #     if self.x + 1 < len(grid):
+                #         print("Case basse v : ", grid[self.x + 1][self.y].color)
+                #     else:
+                #         print("Case basse v : Bord de la grille")
+
+                #     if self.y - 1 >= 0:
+                #         print("Case gauche < : ", grid[self.x][self.y - 1].color)
+                #     else:
+                #         print("Case gauche < : Bord de la grille")
+
+                #     if self.y + 1 < len(grid[0]):
+                #         print("Case droite > : ", grid[self.x][self.y + 1].color)
+                #     else:
+                #         print("Case droite > : Bord de la grille")
+
 
         return
 
