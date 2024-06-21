@@ -48,9 +48,13 @@ class NeuralNetwork:
     def write_salary_to_json(self, salary: float, id_startNN: int) -> None:
         results_filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'results.json'))
 
-        if os.path.exists(results_filename):
+        # Vérifiez si le fichier JSON existe et n'est pas vide
+        if os.path.exists(results_filename) and os.path.getsize(results_filename) > 0:
             with open(results_filename, 'r') as f:
-                results_data = json.load(f)
+                try:
+                    results_data = json.load(f)
+                except json.JSONDecodeError:
+                    results_data = {}
         else:
             results_data = {}
 

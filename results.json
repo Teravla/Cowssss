@@ -1,2 +1,172 @@
 {
+    "Id_StartNN_1": {
+        "Date": "2024-06-21 21:00:56",
+        "instance": {
+            "Instance_82": {
+                "salary": 72070.0
+            },
+            "Instance_59": {
+                "salary": 66990.0
+            },
+            "Instance_33": {
+                "salary": 69500.0
+            },
+            "Instance_95": {
+                "salary": 71750.0
+            },
+            "Instance_88": {
+                "salary": 71490.0
+            },
+            "Instance_31": {
+                "salary": 50430.0
+            },
+            "Instance_18": {
+                "salary": 53740.0
+            },
+            "Instance_27": {
+                "salary": 59670.0
+            },
+            "Instance_21": {
+                "salary": 58050.0
+            },
+            "Instance_53": {
+                "salary": 53160.0
+            },
+            "Instance_36": {
+                "salary": 58480.0
+            },
+            "Instance_52": {
+                "salary": 56080.0
+            },
+            "Instance_68": {
+                "salary": 75450.0
+            },
+            "Instance_56": {
+                "salary": 58850.0
+            },
+            "Instance_3": {
+                "salary": 58940.0
+            },
+            "Instance_70": {
+                "salary": 74430.0
+            },
+            "Instance_66": {
+                "salary": 73870.0
+            },
+            "Instance_79": {
+                "salary": 63790.0
+            },
+            "Instance_57": {
+                "salary": 67320.0
+            },
+            "Instance_75": {
+                "salary": 79790.0
+            },
+            "Instance_91": {
+                "salary": 79590.0
+            },
+            "Instance_44": {
+                "salary": 82350.0
+            },
+            "Instance_92": {
+                "salary": 65110.0
+            },
+            "Instance_40": {
+                "salary": 61040.0
+            },
+            "Instance_24": {
+                "salary": 62560.0
+            },
+            "Instance_69": {
+                "salary": 74770.0
+            },
+            "Instance_43": {
+                "salary": 70660.0
+            },
+            "Instance_41": {
+                "salary": 86850.0
+            },
+            "Instance_12": {
+                "salary": 76860.0
+            },
+            "Instance_64": {
+                "salary": 83580.0
+            },
+            "Instance_49": {
+                "salary": 77500.0
+            },
+            "Instance_74": {
+                "salary": 81590.0
+            },
+            "Instance_45": {
+                "salary": 78470.0
+            },
+            "Instance_50": {
+                "salary": 100270.0
+            },
+            "Instance_78": {
+                "salary": 62380.0
+            },
+            "Instance_99": {
+                "salary": 85300.0
+            },
+            "Instance_25": {
+                "salary": 82100.0
+            },
+            "Instance_15": {
+                "salary": 53230.0
+            },
+            "Instance_23": {
+                "salary": 54700.0
+            },
+            "Instance_6": {
+                "salary": 56340.0
+            },
+            "Instance_16": {
+                "salary": 56320.0
+            },
+            "Instance_4": {
+                "salary": 72320.0
+            },
+            "Instance_7": {
+                "salary": 61280.0
+            },
+            "Instance_2": {
+                "salary": 67290.0
+            },
+            "Instance_9": {
+                "salary": 56570.0
+            },
+            "Instance_8": {
+                "salary": 66940.0
+            },
+            "Instance_14": {
+                "salary": 56370.0
+            },
+            "Instance_10": {
+                "salary": 76640.0
+            },
+            "Instance_1": {
+                "salary": 60720.0
+            },
+            "Instance_11": {
+                "salary": 85220.0
+            },
+            "Instance_17": {
+                "salary": 83350.0
+            },
+            "Instance_19": {
+                "salary": 62470.0
+            },
+            "Instance_5": {
+                "salary": 75260.0
+            },
+            "Instance_13": {
+                "salary": 77020.0
+            },
+            "Instance_22": {
+                "salary": 63180.0
+            }
+        }
+    }
 }
