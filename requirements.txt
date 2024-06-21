@@ -1,18 +1,1 @@
-# Bibliothèques tierces
 matplotlib
-tk
-multiprocessing
-
-# Bibliothèques standard Python (pas besoin de les inclure)
-csv
-os
-datetime
-heapq
-random
-tkinter
-sys
-json
-typing
-
-# Note: Les modules internes spécifiques à votre projet ne doivent pas être listés ici,
-# mais doivent être correctement structurés dans votre projet.
