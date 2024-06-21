@@ -2,35 +2,39 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Clone repository') {
             steps {
-                // Cloner le repository contenant main.py
-                git 'https://github.com/Teravla/Cowssss.git'
+                git branch: 'gpu-integration', url: 'https://github.com/Teravla/Cowssss.git'
             }
         }
 
-        stage('Setup Environment') {
+        stage('Setup Python environment') {
             steps {
-                // Installer les dépendances si nécessaire
-                sh 'python -m venv venv'
-                sh 'source venv/bin/activate && pip install -r requirements.txt'
+                script {
+                    // Assurez-vous d'utiliser le bon chemin vers votre environnement virtuel
+                    sh '''
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
-        stage('Run main.py') {
+        stage('Run script') {
             steps {
-                // Exécuter le script Python
-                sh 'source venv/bin/activate && python main.py'
+                script {
+                    sh '''
+                    source venv/bin/activate
+                    python main.py
+                    '''
+                }
             }
         }
     }
 
     post {
         always {
-            // Archive les fichiers de build, résultats de tests, etc.
-            archiveArtifacts artifacts: '**/target/*.*', allowEmptyArchive: true
-
-            // Nettoyer l'environnement de build
             cleanWs()
         }
     }
