@@ -4,18 +4,20 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git branch: 'gpu-integration', url: 'https://github.com/Teravla/Cowssss.git'
+                git branch: 'gpu-integration', url: 'https://github.com/votre-utilisateur/votre-depot.git'
             }
         }
 
         stage('Setup Python environment') {
             steps {
                 script {
-                    // Assurez-vous d'utiliser le bon chemin vers votre environnement virtuel
                     sh '''
+                    # Utiliser bash au lieu de sh
+                    bash -c '
                     python3 -m venv venv
                     source venv/bin/activate
                     pip install -r requirements.txt
+                    '
                     '''
                 }
             }
@@ -25,8 +27,10 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    bash -c '
                     source venv/bin/activate
                     python main.py
+                    '
                     '''
                 }
             }
