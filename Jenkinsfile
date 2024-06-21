@@ -11,14 +11,8 @@ pipeline {
         stage('Setup Python environment') {
             steps {
                 script {
-                    sh '''
-                    # Utiliser bash au lieu de sh
-                    bash -c '
-                    python3 -m venv venv
-                    source venv/bin/activate
-                    pip install -r requirements.txt
-                    '
-                    '''
+                    bash -c 'python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt'
+
                 }
             }
         }
@@ -26,12 +20,11 @@ pipeline {
         stage('Run script') {
             steps {
                 script {
-                    sh '''
                     bash -c '
                     source venv/bin/activate
                     python main.py
                     '
-                    '''
+                    
                 }
             }
         }
