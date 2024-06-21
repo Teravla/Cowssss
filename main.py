@@ -33,6 +33,8 @@ class InterfaceGraphique(tk.Tk):
         if self.square_length % 2 != 0:
             raise ValueError("Square length must be an even number.")
         self.nb_square = init_params["number_of_squares"]
+        if self.nb_square % 2 == 0:
+            raise ValueError("Number of squares must be an odd number.")
         self.spacing = init_params["spacing"]
         self.number_cows = init_params["number_of_cows"]
         
@@ -132,7 +134,7 @@ class InterfaceGraphique(tk.Tk):
 
         self.pre = [[None for _ in range(self.nb_square)] for _ in range(self.nb_square)]  # Grille de nb_square x nb_square pour stocker les cases
 
-        box_creation(self.canvas, self.pre, self.square_length, self.spacing, self.mix_food_params)
+        box_creation(self.canvas, self.pre, self.square_length, self.spacing, self.mix_food_params, self.nb_square)
 
         self.farm = Farm(self.canvas, self.pre, self.nb_square, self.number_cows, self.square_length // 2, "white", self.square_length, self.thirst_cow, self.hunger_cow, self.milk_cow, self.breeder_salary, self.spacing)
         self.cows = self.farm.cows
@@ -201,6 +203,6 @@ class InterfaceGraphique(tk.Tk):
 
 
 if __name__ == "__main__":
-    app = InterfaceGraphique("config.json", True)
+    app = InterfaceGraphique("config.json", False)
     app.mainloop()
 

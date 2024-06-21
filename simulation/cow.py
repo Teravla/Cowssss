@@ -11,7 +11,7 @@ class Cow:
     # Variable statique pour attribuer un identifiant unique à chaque vache
     cow_id_counter = 0
 
-    def __init__(self, canvas: tk.Canvas, x: int, y:int , radius: float, color: str, dim_box: int, init_thirst: int, init_hunger: int, init_milk: int, farm: 'Farm', spacing: int):
+    def __init__(self, canvas: tk.Canvas, x: int, y:int , radius: float, color: str, dim_box: int, init_thirst: int, init_hunger: int, init_milk: int, farm: 'Farm', spacing: int, nb_square: int):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -21,6 +21,7 @@ class Cow:
         self.tick_count = 0
         self.path_to_farm = []
         self.spacing = spacing
+        self.nb_square = nb_square
 
         self.color_visit_count = {
             "green": 0,
@@ -46,7 +47,7 @@ class Cow:
         self.farm = farm  # Référence à l'instance de la ferme
         self.algo = Algorithm()
 
-        self.draw(self.radius, self.color, self.dim_box)
+        self.draw()
 
     def get_breeder_salary(self) -> float:
         """
@@ -55,17 +56,24 @@ class Cow:
         return self.farm.breeder_salary
 
 
-    def draw(self, radius: float, color: str, dim_box: int) -> None:
+    def draw(self) -> None:
             """
             This method is used to draw a cow on the canvas.
             """
 
-            alpha = (dim_box + self.spacing) + 1
-            beta = ((0.5 * dim_box) + 8)
+            alpha = (self.dim_box + self.spacing) + 1
+            beta = (self.spacing - 1) + ((self.dim_box - 1) // 2)
+
+            if self.nb_square == 3:
+                beta += 1
+            else:
+                beta -= (self.nb_square - 5) // 2
+             
 
             center_x = self.x * alpha + beta
             center_y = self.y * alpha + beta
-            self.circle_id = self.canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill=color)
+            self.circle_id = self.canvas.create_oval(center_x - self.radius, center_y - self.radius, center_x + self.radius, center_y + self.radius, fill=self.color)
+            self.canvas.create_oval(center_x, center_y, center_x, center_y, fill="black")
 
 
     def update_needs(self, hunger_evolution: int, thirst_evolution: int, milk_evolution: int, hunger_to_milk: int, thirst_to_milk: int) -> None:
@@ -130,7 +138,7 @@ class Cow:
                 if not any(cow.x == new_x and cow.y == new_y for cow in cows if cow.alive and cow != self):
                     self.x = new_x
                     self.y = new_y
-                    self.canvas.move(self.circle_id, dx * alpha, dy * alpha)  # Déplacer le cercle correspondant à la vache
+                    self.canvas.move(self.circle_id, dx * alpha, dy * alpha)
             else:
                 print(f"Vache {self.id} ne peut pas se déplacer sur la case bleue.")
                 print(f"La case bleue est à la position ({new_x}, {new_y}) et la vache est à la position ({self.x}, {self.y}).")
@@ -374,7 +382,7 @@ class Farm:
                         new_x, new_y = x + dx, y + dy
                         if is_valid_position(new_x, new_y):
                             x, y = new_x, new_y
-                            cow = Cow(self.canvas, x, y, radius, color, dim_box, init_thirst, init_hunger, init_milk, self, spacing)
+                            cow = Cow(self.canvas, x, y, radius, color, dim_box, init_thirst, init_hunger, init_milk, self, spacing, self.nb_square)
 
                             self.pre[x][y].has_cow = True
                             created_cows.append(cow)  # Ajout de la vache créée à la liste
