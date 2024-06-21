@@ -1,6 +1,8 @@
 
 import tkinter as tk
 from tkinter import messagebox
+from typing import List
+
 from data.result import create_csv
 from simulation.box import box_creation
 from simulation.cow import Farm
@@ -13,14 +15,17 @@ class InterfaceGraphique(tk.Tk):
     This class is used to create the graphical interface of the simulation.
     """
 
-
     def __init__(self, file: str, NN: bool) -> None:
+        super().__init__()  # Initialisation de la classe parente
+
         self.nb_tour = 0
         self.config_file = file
 
         # Chargement des paramètres depuis le fichier JSON
         with open(self.config_file, 'r') as f:
             config_data = json.load(f)
+        
+        self.simulation_running = False  # Déclaration explicite de l'attribut
 
         init_params = config_data.get("init_parameter", {}) 
         cow_params = config_data.get("cow_evolution", {})
@@ -64,10 +69,12 @@ class InterfaceGraphique(tk.Tk):
             self.csv_filepath = create_csv()
 
         self.NN = NN
+        self.cow_reason_death = None
+        self.cow_id_death = None   
 
-        super().__init__()
         self.initialize()
         self.start_simulation()
+
 
 
     def parse_food_values(self, food_value_params: list[dict[str, str | int | float]]) -> dict[str, dict[str, str | int | float]]:
@@ -165,6 +172,20 @@ class InterfaceGraphique(tk.Tk):
         return self.breeder_salary
     
 
+    def get_cow_reason_death(self) -> List[str] | None:
+        """
+        This method is used to get the cow reason of death.
+        """
+        return self.cow_reason_death
+    
+
+    def get_cow_id_death(self) -> List[int] | None:
+        """
+        This method is used to get the cow id of death.
+        """
+        return self.cow_id_death
+    
+
 
     def tick(self) -> None:
         """
@@ -173,15 +194,25 @@ class InterfaceGraphique(tk.Tk):
         if self.simulation_running:
             self.nb_tour += 1
             csv_filepath = self.csv_filepath if self.show_analysis else None
-            
+
+            # Initialiser les listes de raison de mort et d'ID si elles n'existent pas
+            if not hasattr(self, 'cow_reason_death') or self.cow_reason_death is None:
+                self.cow_reason_death = []
+            if not hasattr(self, 'cow_id_death') or self.cow_id_death is None:
+                self.cow_id_death = []
+
             # Appeler simulate_tick une seule fois
-            result = simulate_tick(
+            result, cow_reason_death, cow_id_death = simulate_tick(
                 self.cows, self.pre, self.nb_tour,
                 self.hunger_evolution, self.thirst_evolution, self.milk_evolution,
                 self.add_hunger, self.add_thirst,
                 self.hunger_to_milk, self.thirst_to_milk, self.algorithm_to_farm,
-                csv_filepath, self.show_analysis, self.mix_food_params, self.breeder_salary
+                csv_filepath, self.show_analysis, self.mix_food_params, self.breeder_salary,
+                self.cow_reason_death, self.cow_id_death
             )
+
+            self.cow_reason_death = cow_reason_death if cow_reason_death is not None else []
+            self.cow_id_death = cow_id_death if cow_id_death is not None else []
             
             # Mettre à jour breeder_salary si result n'est pas None, sinon assigner -1
             self.breeder_salary = result if result is not None else -1
@@ -195,10 +226,11 @@ class InterfaceGraphique(tk.Tk):
                 
             else:
                 self.after(self.number_ticks, self.tick)
-        else:
-            pass
-            # self.destroy()
-            # exit()
+
+        # else:
+        #     pass
+        #     # self.destroy()
+        #     # exit()
 
 
 

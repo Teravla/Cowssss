@@ -45,7 +45,6 @@ class Box:
         
         # Supprimer l'ancien texte s'il existe
         if hasattr(self, 'text_id') and self.text_id is not None:
-            print(f"Suppression de l'ancien texte {self.text_id} contenant {self.food_lifetime}")
             self.canvas.delete(self.text_id)
 
         
@@ -71,7 +70,7 @@ class Box:
         """
         This method is used to set the color of the box.
         """
-        print(f"Changing color of box at {self.x}, {self.y} to {new_color}.")
+
         self.color = new_color
         self.canvas.itemconfig(self.rectangle_id, fill=self.color)
 
@@ -82,7 +81,7 @@ def colorized_box(mix_food_params: Dict[str, Dict[str, str | int | float]], nb_s
     This function is used to colorize the boxes.
     """
     total_squares = nb_square_per_line * nb_square_per_line - 1  # We subtract 1 for the special gray box
-    print(f"Total squares: {total_squares}, nb_square_per_line: {nb_square_per_line}")
+    
     colors = []
 
     cumulative_total = 0

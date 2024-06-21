@@ -73,7 +73,6 @@ class Cow:
             center_x = self.x * alpha + beta
             center_y = self.y * alpha + beta
             self.circle_id = self.canvas.create_oval(center_x - self.radius, center_y - self.radius, center_x + self.radius, center_y + self.radius, fill=self.color)
-            self.canvas.create_oval(center_x, center_y, center_x, center_y, fill="black")
 
 
     def update_needs(self, hunger_evolution: int, thirst_evolution: int, milk_evolution: int, hunger_to_milk: int, thirst_to_milk: int) -> None:
@@ -252,7 +251,7 @@ class Cow:
             self.update_needs(hunger_evolution, thirst_evolution, milk_evolution, hunger_to_milk, thirst_to_milk)
         
 
-    def recover(self, grid: List, mix_food_params: dict[str, dict[str, str | int | float]], color: str) -> None:
+    def recover(self, grid: List, mix_food_params: dict[str, dict[str, str | int | float]]) -> None:
         """
         This method is used to recover the cow.
         """
@@ -263,7 +262,9 @@ class Cow:
                 box.update_color()
                 if box.time_to_recovery == 0 and box.color == "black":
                     
-                    choice_color = color
+                    # Choisir une couleur aléatoire dans mix_food_params qui n'est pas "blue"
+                    available_colors = [params["color"] for params in mix_food_params.values() if params["color"] != "blue"]
+                    choice_color = random.choice(available_colors)
                     
                     # Chercher les paramètres associés à la couleur choisie
                     for food_type, params in mix_food_params.items():
@@ -271,10 +272,9 @@ class Cow:
                             food_value = float(params["food_value"])
                             food_lifetime = float(params["food_lifetime"])
 
-                            
                             if self.farm.breeder_salary >= food_value:
                                 self.farm.breeder_salary -= food_value
-                                # TODO : Changer la couleur de la case en fonction des paramètres de l'IA
+                                # Changer la couleur de la case en fonction des paramètres de l'IA
                                 food_lifetime = int(food_lifetime)
                                 box.recolor(choice_color, food_lifetime)
                             break  # Sortir de la boucle une fois que nous avons trouvé et traité la couleur choisie
@@ -331,8 +331,6 @@ class Cow:
 
             if current_box.food_lifetime == 0:
                 current_box.set_color("black")
-        else: 
-            print(f"La vache {self.id} ne peut pas manger sur la case ({self.x}, {self.y}).")
 
         return
 
