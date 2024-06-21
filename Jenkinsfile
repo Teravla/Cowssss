@@ -5,7 +5,7 @@ pipeline {
         stage('Check pip installation') {
             steps {
                 script {
-                    // Vérifier si pip est installé en utilisant la commande pip --version
+                    // Vérifiez si pip est installé en utilisant la commande pip --version
                     def pipOutput = sh(returnStdout: true, script: 'pip --version')
                     if (pipOutput.contains('not found')) {
                         echo "pip n'est pas installé, installation en cours..."
