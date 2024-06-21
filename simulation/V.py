@@ -146,7 +146,7 @@ class StartNN:
 if __name__ == "__main__":
     config_filename = 'config.json'
     results_filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'results.json'))
-    iterations = 100  # Nombre d'instances à créer
+    iterations = 10  # Nombre d'instances à créer
     nb_cow_init = 20  # Nombre initial de vaches
 
     startNN = StartNN(config_filename, iterations, nb_cow_init, results_filename)

@@ -168,5 +168,40 @@
                 "salary": 63180.0
             }
         }
+    },
+    "Id_StartNN_2": {
+        "Date": "2024-06-22 00:12:41",
+        "instance": {
+            "Instance_2": {
+                "salary": 51360.0
+            },
+            "Instance_7": {
+                "salary": 60580.0
+            },
+            "Instance_4": {
+                "salary": 59010.0
+            },
+            "Instance_6": {
+                "salary": 65150.0
+            },
+            "Instance_3": {
+                "salary": 75140.0
+            },
+            "Instance_9": {
+                "salary": 51560.0
+            },
+            "Instance_10": {
+                "salary": 67010.0
+            },
+            "Instance_1": {
+                "salary": 73040.0
+            },
+            "Instance_8": {
+                "salary": 78690.0
+            },
+            "Instance_5": {
+                "salary": 69800.0
+            }
+        }
     }
 }
