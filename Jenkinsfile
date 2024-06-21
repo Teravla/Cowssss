@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git branch: 'gpu-integration', url: 'https://github.com/votre-utilisateur/votre-depot.git'
+                git branch: 'gpu-integration', url: 'https://github.com/Teravla/Cowssss.git'
             }
         }
 
