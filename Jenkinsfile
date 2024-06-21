@@ -13,18 +13,13 @@ pipeline {
                     } else {
                         echo "pip est déjà installé : ${pipOutput}"
                     }
-                }
-            }
-        }
 
-        stage('Setup Python environment') {
-            steps {
-                script {
-                    // Utiliser bash pour exécuter les commandes nécessitant source
+                    // Activer l'environnement virtuel et mettre à jour pip et setuptools
                     sh '''
                     bash -c '
                     python3 -m venv venv
                     source venv/bin/activate
+                    python3 -m pip install --upgrade pip setuptools
                     python3 -m pip install -r requirements.txt
                     '
                     '''
