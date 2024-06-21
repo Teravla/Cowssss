@@ -5,7 +5,7 @@ pipeline {
         stage('Check pip installation') {
             steps {
                 script {
-                    // Vérifiez si pip est installé en utilisant la commande pip --version
+                    // Vérifier si pip est installé en utilisant la commande pip --version
                     def pipOutput = sh(returnStdout: true, script: 'pip --version')
                     if (pipOutput.contains('not found')) {
                         echo "pip n'est pas installé, installation en cours..."
@@ -14,14 +14,12 @@ pipeline {
                         echo "pip est déjà installé : ${pipOutput}"
                     }
 
-                    // Activer l'environnement virtuel et mettre à jour pip et setuptools
+                    // Créer et activer l'environnement virtuel
                     sh '''
-                    bash -c '
                     python3 -m venv venv
                     source venv/bin/activate
                     python3 -m pip install --upgrade pip setuptools
                     python3 -m pip install -r requirements.txt
-                    '
                     '''
                 }
             }
@@ -30,11 +28,10 @@ pipeline {
         stage('Run script') {
             steps {
                 script {
+                    // Utiliser python3 de l'environnement virtuel pour exécuter main.py
                     sh '''
-                    bash -c '
                     source venv/bin/activate
                     python3 main.py
-                    '
                     '''
                 }
             }
