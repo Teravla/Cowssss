@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Ignore directories named _temp
+# Ignorer le dossier _temp dans le répertoire simulation
 simulation/_temp/
 
 

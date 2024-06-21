@@ -106,6 +106,8 @@ def colorized_box(mix_food_params: Dict[str, Dict[str, str | int | float]], nb_s
         
         colors.extend([(color, food_lifetime, time_to_recovery)] * count)
 
+    
+
 
     if (cumulative_total < total_squares) or (len(colors) != total_squares):
         print(f"Cumulative total is less than total squares: {cumulative_total} < {total_squares}")
