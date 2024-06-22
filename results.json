@@ -203,5 +203,78 @@
                 "salary": 69800.0
             }
         }
+    },
+    "Id_StartNN_3": {
+        "Date": "2024-06-22 09:57:47",
+        "instance": {
+            "Instance_1": {
+                "salary": 65700.0
+            }
+        }
+    },
+    "Id_StartNN_4": {
+        "Date": "2024-06-22 10:00:28",
+        "instance": {
+            "Instance_1": {
+                "salary": 83950.0
+            }
+        }
+    },
+    "Id_StartNN_5": {
+        "Date": "2024-06-22 10:08:47",
+        "instance": {
+            "Instance_1": {
+                "salary": 63300.0
+            }
+        }
+    },
+    "Id_StartNN_6": {
+        "Date": "2024-06-22 10:12:38",
+        "instance": {
+            "Instance_1": {
+                "salary": 65090.0
+            }
+        }
+    },
+    "Id_StartNN_7": {
+        "Date": "2024-06-22 10:13:41",
+        "instance": {
+            "Instance_1": {
+                "salary": 73580.0
+            }
+        }
+    },
+    "Id_StartNN_8": {
+        "Date": "2024-06-22 10:13:54",
+        "instance": {
+            "Instance_1": {
+                "salary": 63900.0
+            },
+            "Instance_2": {
+                "salary": 73520.0
+            }
+        }
+    },
+    "Id_StartNN_9": {
+        "Date": "2024-06-22 10:16:40",
+        "instance": {
+            "Instance_2": {
+                "salary": 91130.0
+            },
+            "Instance_1": {
+                "salary": 98620.0
+            }
+        }
+    },
+    "Id_StartNN_10": {
+        "Date": "2024-06-22 10:21:07",
+        "instance": {
+            "Instance_1": {
+                "salary": 68310.0
+            },
+            "Instance_2": {
+                "salary": 81060.0
+            }
+        }
     }
 }

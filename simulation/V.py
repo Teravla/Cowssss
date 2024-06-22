@@ -1,8 +1,10 @@
+import random
+import shutil
 import sys
 import os
 import json
 from typing import Any, Dict, List
-from multiprocessing import Process
+from multiprocessing import Manager, Process
 from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -23,13 +25,66 @@ class ModifierJson:
         with open(self.nom_fichier, 'w') as f:
             json.dump(data, f, indent=4)
 
-class NeuralNetwork:
-    instance_counter = 1
+    def change_config(self, config_filename: str, id: int) -> str:
+        print(f"Modification du fichier {config_filename} pour l'instance {id}")
+        # Lire le fichier JSON
+        with open(config_filename, 'r') as f:
+            config_data = json.load(f)
+        
+        # Extraire les valeurs de "Mix" et identifier celles à modifier
+        mix_values = [food['Mix'] for food in config_data['food_value'] if food['Type of Food'] != 'Water']
+        water_mix = [food['Mix'] for food in config_data['food_value'] if food['Type of Food'] == 'Water'][0]
 
-    def __init__(self, config_filename: str):
-        self.config_filename = config_filename
-        self.instance_id = NeuralNetwork.instance_counter
-        NeuralNetwork.instance_counter += 1
+        # Modifier aléatoirement les valeurs de "Mix" pour les aliments autres que "Water"
+        new_mix_values = [max(0, min(1, mix + random.uniform(-0.2, 0.2))) for mix in mix_values]
+
+        # Ajuster les valeurs de "Mix" pour s'assurer que la somme est égale à 1
+        total_mix = sum(new_mix_values) + water_mix
+        adjustment_factor = (1 - water_mix) / sum(new_mix_values)
+        adjusted_mix_values = [mix * adjustment_factor for mix in new_mix_values]
+
+        # Arrondir les valeurs à trois chiffres après la virgule
+        rounded_mix_values = [round(mix, 3) for mix in adjusted_mix_values]
+
+        # Correction finale pour que la somme fasse exactement 1 après l'arrondi
+        total_rounded_mix = sum(rounded_mix_values) + round(water_mix, 3)
+        discrepancy = 1 - total_rounded_mix
+
+        # Ajouter la différence à l'un des éléments pour corriger la somme
+        if discrepancy != 0:
+            for i in range(len(rounded_mix_values)):
+                if rounded_mix_values[i] + discrepancy >= 0 and rounded_mix_values[i] + discrepancy <= 1:
+                    rounded_mix_values[i] += discrepancy
+                    break
+
+        # Mettre à jour les valeurs de "Mix" dans les données de configuration
+        mix_index = 0
+        for food in config_data['food_value']:
+            if food['Type of Food'] != 'Water':
+                food['Mix'] = rounded_mix_values[mix_index]
+                mix_index += 1
+
+        # Créer le répertoire config_out s'il n'existe pas
+        output_dir = os.path.join(os.path.dirname(__file__), 'config_out')
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Définir le nom du fichier de sortie
+        file_out = os.path.join(output_dir, f'file_out_{id}.json')
+
+        # Écrire les modifications dans le fichier JSON file_out
+        with open(file_out, 'w') as f:
+            json.dump(config_data, f, indent=4)
+
+        return file_out
+
+
+class NeuralNetwork:
+
+
+    def __init__(self, config_filename: str, modifier: ModifierJson, instance_id: int) -> None:
+        self.instance_id = instance_id
+        self.config_filename = modifier.change_config(config_filename, self.instance_id)
+
 
     def start_simulation(self) -> 'InterfaceGraphique':
         print(f"Démarrage de la simulation pour l'instance {self.instance_id}")
@@ -44,6 +99,9 @@ class NeuralNetwork:
     
     def get_cow_reason_death(self, interface: 'InterfaceGraphique') -> List[str] | None:
         return interface.get_cow_reason_death()
+    
+    def get_instance_id(self) -> int:
+        return self.instance_id
     
     def write_salary_to_json(self, salary: float, id_startNN: int) -> None:
         results_filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'results.json'))
@@ -76,9 +134,8 @@ class NeuralNetwork:
             json.dump(results_data, f, indent=4)
 
 
-def simulate_in_process(config_filename: str, instance_id: int, id_startNN: int) -> None:
-    nn = NeuralNetwork(config_filename)
-    nn.instance_id = instance_id
+def simulate_in_process(config_filename: str, instance_id: int, id_startNN: int, modifier: ModifierJson, result_dict: Dict[int, float]) -> None:
+    nn = NeuralNetwork(config_filename, modifier, instance_id)
     interface = nn.start_simulation()
 
     def simulate():
@@ -92,20 +149,22 @@ def simulate_in_process(config_filename: str, instance_id: int, id_startNN: int)
                 for cow_id, reason_death in zip(cow_id, reason_death):
                     if reason_death == "hunger":
                         print(f"I{instance_id} - C{cow_id} - {reason_death}")
-                    # print(f"Cow {cow_id} has died by {reason_death} for the instance {nn.instance_id}")
             nn.write_salary_to_json(salary, id_startNN)
+            result_dict[nn.instance_id] = salary
             print("Salaire pour l'instance {} : {:.2f}".format(nn.instance_id, salary))
             interface.quit()
 
     interface.after(0, simulate)
     interface.mainloop()
 
+    print(f"Fin de la simulation pour l'instance {nn.instance_id} - Salaire : {result_dict}")
+
 class StartNN:
     instance_counter = 1
 
-    def __init__(self, config_filename: str, iterations: int, nb_cow_init: int, results_filename: str):
+    def __init__(self, config_file: str, iterations: int, nb_cow_init: int, results_filename: str):
         self.init_counter(results_filename)
-        self.config_filename = config_filename
+        self.config_filename = config_file
         self.iterations = iterations
         self.nb_cow_init = nb_cow_init
         self.id = StartNN.instance_counter
@@ -133,20 +192,48 @@ class StartNN:
         modifier = ModifierJson(self.config_filename)
         modifier.modifier_nombre_vaches(self.nb_cow_init)
 
-        processes = []
-        for i in range(self.iterations):
-            process = Process(target=simulate_in_process, args=(self.config_filename, i + 1, self.id))
-            process.start()
-            processes.append(process)
+        with Manager() as manager:
+            result_dict = manager.dict()  # Créer un dictionnaire partagé
 
-        for process in processes:
-            process.join()
+            processes = []
+            for i in range(self.iterations):
+                process = Process(target=simulate_in_process, args=(self.config_filename, i + 1, self.id, modifier, result_dict))
+                process.start()
+                processes.append(process)
+
+            for process in processes:
+                process.join()
+
+            # Convertir le dictionnaire partagé en dictionnaire régulier
+            result_dict = dict(result_dict)
+            print(f"Dictionnaire avec salaires : {result_dict}")
+        
+        # Appeler reniew_json pour mettre à jour config.json
+        self.reniew_json(self.results_filename, self.config_filename)
+    
+    def reniew_json(self, results_filename: str, config_filename: str) -> None:
+        # Charger le dictionnaire des résultats
+        with open(results_filename, 'r') as f:
+            results_data = json.load(f)
+
+        # Trouver l'instance avec le salaire le plus élevé
+        max_salary_instance = max(results_data, key=results_data.get)
+        max_salary = results_data[max_salary_instance]
+        print(f"Instance avec le salaire le plus élevé : {max_salary_instance} - Salaire : {max_salary}")
+
+        # Construire le chemin du fichier de configuration de l'instance
+        config_out_dir = os.path.join(os.path.dirname(__file__), 'simulation', 'config_out')
+        max_salary_config_file = os.path.join(config_out_dir, f'file_out_{max_salary_instance}.json')
+
+        # Copier le fichier de configuration pour remplacer config.json
+        shutil.copy(max_salary_config_file, config_filename)
+        print(f"Fichier de configuration {max_salary_config_file} copié vers {config_filename}")
 
 
 if __name__ == "__main__":
     config_filename = 'config.json'
     results_filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'results.json'))
-    iterations = 10  # Nombre d'instances à créer
+    iterations = 2  # Nombre d'instances à créer
     nb_cow_init = 20  # Nombre initial de vaches
 
     startNN = StartNN(config_filename, iterations, nb_cow_init, results_filename)
