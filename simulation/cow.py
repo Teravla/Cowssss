@@ -105,6 +105,8 @@ class Cow:
             self.reason_death = "hunger" if self.hunger <= 0 else "thirst"
             if self.thirst <= 0:
                 self.remove()
+            if self.hunger <= 0:
+                self.remove()
         
         if self.alive and self.hunger >= hunger_to_milk and self.thirst >= thirst_to_milk:
             self.milk += milk_evolution

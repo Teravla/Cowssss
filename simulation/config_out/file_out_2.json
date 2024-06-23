@@ -38,7 +38,7 @@
             "Milk Value": 50,
             "Food Lifetime": 1,
             "Time to Recovery": 2,
-            "Mix": 0.299,
+            "Mix": 0.839,
             "Quality": 0.8,
             "Color": "green"
         },
@@ -48,7 +48,7 @@
             "Milk Value": 10,
             "Food Lifetime": 2,
             "Time to Recovery": 2,
-            "Mix": 0.208,
+            "Mix": 0.0,
             "Quality": 0.2,
             "Color": "yellow"
         },
@@ -58,7 +58,7 @@
             "Milk Value": 45,
             "Food Lifetime": 5,
             "Time to Recovery": 2,
-            "Mix": 0.224,
+            "Mix": 0.0,
             "Quality": 0.65,
             "Color": "brown"
         },
@@ -68,7 +68,7 @@
             "Milk Value": 30,
             "Food Lifetime": 3,
             "Time to Recovery": 2,
-            "Mix": 0.063,
+            "Mix": 0.0,
             "Quality": 0.3,
             "Color": "orange"
         },
@@ -78,7 +78,7 @@
             "Milk Value": 35,
             "Food Lifetime": 3,
             "Time to Recovery": 2,
-            "Mix": 0.156,
+            "Mix": 0.111,
             "Quality": 0.4,
             "Color": "lightgray"
         },
