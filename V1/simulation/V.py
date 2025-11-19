@@ -8,7 +8,7 @@ from multiprocessing import Manager, Process
 from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from main import InterfaceGraphique
+from V1.main import InterfaceGraphique
 
 max_salary_tt = 0
 
