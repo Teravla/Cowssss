@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cowssss Simulation</title>
+</head>
+
+<body>
+    <h1>Cowssss Simulation</h1>
+    <script type="module">
+        import init, { /* tes fonctions exposées */ } from './pkg/cowssss.js';
+
+        async function run() {
+            await init();
+            // Exemple simple pour tester
+            console.log("WASM module initialized");
+        }
+
+        run();
+    </script>
+</body>
+
+</html>
