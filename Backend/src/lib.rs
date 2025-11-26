@@ -29,6 +29,11 @@ pub mod enums {
     pub mod cell_role;
 }
 
+pub mod core {
+    pub mod dijkstra_pathfinding;
+    pub mod astar_pathfinding;
+}
+
 #[wasm_bindgen]
 pub fn render(ctx: &JsValue, number_of_cows: usize) {
     let ctx: CanvasRenderingContext2d = ctx
