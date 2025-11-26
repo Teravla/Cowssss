@@ -1,8 +1,8 @@
 [package]
 name = "cowssss"
 description = "Backend for Cowssss application"
-repository = "https://github.com/vmenon/Cowssss"
-license = "Private"
+repository = "https://github.com/teravla/Cowssss"
+license-file = "LICENSE"
 version = "0.1.0"
 edition = "2024"
 

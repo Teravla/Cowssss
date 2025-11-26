@@ -24,7 +24,7 @@ impl Grid {
                 let role = if j == cols - 1 {
                     if i == rows / 2 {
                         // case noire centrale
-                        Role::Black
+                        Role::Farm
                     } else {
                         // aucune cellule pour les autres lignes de la dernière colonne
                         continue;
@@ -58,5 +58,20 @@ impl Grid {
 
     pub fn add_cow(&mut self, cow: Cow) {
         self.cows[cow.y as usize][cow.x as usize].push(cow);
+    }
+
+    pub fn cell_at(&self, x: i32, y: i32) -> Option<&Cell> {
+        if x < 0 || y < 0 || x >= self.cols || y >= self.rows {
+            return None;
+        }
+        Some(&self.cells[y as usize][x as usize])
+    }
+
+    // Mutable if you want to modify the cell
+    pub fn cell_at_mut(&mut self, x: i32, y: i32) -> Option<&mut Cell> {
+        if x < 0 || y < 0 || x >= self.cols || y >= self.rows {
+            return None;
+        }
+        Some(&mut self.cells[y as usize][x as usize])
     }
 }

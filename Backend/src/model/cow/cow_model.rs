@@ -1,4 +1,4 @@
-use crate::model::cow::cow_structure::Cow;
+use crate::model::{cow::cow_structure::Cow, grid::grid_structure::Grid};
 use std::collections::HashMap;
 
 impl Cow {
@@ -47,6 +47,47 @@ impl Cow {
             alive: true,
             number_milking: 0,
             reason_death: None,
+        }
+    }
+
+    pub fn drink(&mut self, grid: &Grid, add_thirst: i32) {
+        let directions: [(i32, i32); 8] = [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ];
+
+        for (dx, dy) in directions {
+            let new_x: i32 = self.x + dx;
+            let new_y: i32 = self.y + dy;
+
+            if let Some(cell) = grid.cell_at(new_x, new_y) {
+                if cell.role == crate::enums::cell_role::Role::Water {
+                    // Cow drinks without moving
+                    self.thirst = add_thirst;
+                    return;
+                }
+            }
+        }
+    }
+
+    pub fn eat(&mut self, grid: &mut Grid, add_hunger: i32) {
+        if let Some(cell) = grid.cell_at_mut(self.x, self.y) {
+            match cell.role {
+                crate::enums::cell_role::Role::Hay | crate::enums::cell_role::Role::Grass => {
+                    self.hunger += add_hunger;
+                    if self.hunger > 100 {
+                        self.hunger = 100;
+                    }
+                    cell.use_cell();
+                }
+                _ => {} // Water or Farm cells cannot be eaten from
+            }
         }
     }
 }
