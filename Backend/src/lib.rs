@@ -14,11 +14,19 @@ pub mod model {
         pub mod cow_model;
         pub mod cow_structure;
     }
+    pub mod cell {
+        pub mod cell_model;
+        pub mod cell_structure;
+    }
 }
 
 pub mod services {
     pub mod cow_service;
     pub mod grid_service;
+}
+
+pub mod enums {
+    pub mod cell_role;
 }
 
 #[wasm_bindgen]
@@ -55,7 +63,7 @@ pub fn render(ctx: &JsValue, number_of_cows: usize) {
 
     for row in 0..grid.rows as usize {
         for col in 0..grid.cols as usize {
-            for cow in &grid.cells[row][col] {
+            for cow in &grid.cows[row][col] {
                 draw_cow(&ctx, cow, &grid);
             }
         }

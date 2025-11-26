@@ -1,30 +1,13 @@
 use crate::model::grid::grid_structure::Grid;
-use js_sys::Math;
 use web_sys::CanvasRenderingContext2d;
 
 pub fn draw_grid(ctx: &CanvasRenderingContext2d, grid: &Grid) {
-    for i in 0..grid.rows {
-        for j in 0..grid.cols {
-            // Couleur des cases
-            if i == grid.special_row && j == grid.special_col {
-                ctx.set_fill_style_str("black");
-            } else if j != grid.special_col {
-                let r: f64 = Math::random();
-                let color: &str = if r < 0.05 {
-                    "blue"
-                } else if r < 0.2 {
-                    "yellow"
-                } else {
-                    "green"
-                };
-                ctx.set_fill_style_str(color);
-            } else {
-                ctx.set_fill_style_str("white");
-            }
-
+    for row in &grid.cells {
+        for cell in row {
+            ctx.set_fill_style_str(cell.color());
             ctx.fill_rect(
-                j as f64 * grid.cell_width(),
-                i as f64 * grid.cell_height(),
+                cell.x as f64 * grid.cell_width(),
+                cell.y as f64 * grid.cell_height(),
                 grid.cell_width(),
                 grid.cell_height(),
             );

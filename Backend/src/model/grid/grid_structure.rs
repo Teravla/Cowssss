@@ -1,4 +1,4 @@
-use crate::model::cow::cow_structure::Cow;
+use crate::model::{cell::cell_structure::Cell, cow::cow_structure::Cow};
 
 pub struct Grid {
     pub rows: i32,
@@ -9,5 +9,7 @@ pub struct Grid {
     pub special_col: i32,
 
     // 2D vector to hold cows in each cell
-    pub cells: Vec<Vec<Vec<Cow>>>,
+    pub cows: Vec<Vec<Vec<Cow>>>,
+    // 2D vector to hold cell structures
+    pub cells: Vec<Vec<Cell>>,
 }
