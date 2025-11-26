@@ -8,14 +8,22 @@
 
 <body>
     <canvas id="gridCanvas" width="500" height="500"></canvas>
+    <button id="tickButton">Tick</button>
     <script type="module">
-        import init, { render } from './pkg/cowssss.js';
+        import init, { render, tick_js, GRID } from './pkg/cowssss.js';
 
         async function run() {
             await init();
             const canvas = document.getElementById('gridCanvas');
             const ctx = canvas.getContext('2d');
+
             render(ctx, 5);
+
+            const button = document.getElementById('tickButton');
+            button.addEventListener('click', () => {
+                tick_js(GRID); // ou la variable Rust qui contient ta grille
+                render(ctx, 5); // redraw après tick
+            });
         }
 
         run();

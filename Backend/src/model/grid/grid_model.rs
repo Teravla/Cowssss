@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::{
     enums::cell_role::Role,
     model::{cell::cell_structure::Cell, cow::cow_structure::Cow, grid::grid_structure::Grid},
@@ -73,5 +75,34 @@ impl Grid {
             return None;
         }
         Some(&mut self.cells[y as usize][x as usize])
+    }
+
+    pub fn find_nearest(&self, role: Role, start_x: i32, start_y: i32) -> Option<(i32, i32)> {
+        let mut visited: Vec<Vec<bool>> = vec![vec![false; self.cols as usize]; self.rows as usize];
+        let mut queue: VecDeque<(i32, i32)> = VecDeque::new();
+
+        queue.push_back((start_x, start_y));
+        visited[start_y as usize][start_x as usize] = true;
+
+        while let Some((x, y)) = queue.pop_front() {
+            if let Some(cell) = self.cell_at(x, y) {
+                if cell.role == role {
+                    return Some((x, y));
+                }
+            }
+
+            // neighbors (up, down, left, right)
+            let neighbors: [(i32, i32); 4] = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)];
+            for &(nx, ny) in &neighbors {
+                if nx >= 0 && ny >= 0 && nx < self.cols && ny < self.rows {
+                    if !visited[ny as usize][nx as usize] {
+                        visited[ny as usize][nx as usize] = true;
+                        queue.push_back((nx, ny));
+                    }
+                }
+            }
+        }
+
+        None // no cell found
     }
 }

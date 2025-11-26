@@ -1,3 +1,6 @@
+use crate::core::astar_pathfinding::astar_pathfinding;
+use crate::enums::cow_action::CowAction;
+use crate::model::cell::cell_structure::Cell;
 use crate::model::{cow::cow_structure::Cow, grid::grid_structure::Grid};
 use std::collections::HashMap;
 
@@ -50,7 +53,7 @@ impl Cow {
         }
     }
 
-    pub fn drink(&mut self, grid: &Grid, add_thirst: i32) {
+    pub fn drink(&mut self, cells: &Vec<Vec<Cell>>, add_thirst: i32) {
         let directions: [(i32, i32); 8] = [
             (-1, -1),
             (-1, 0),
@@ -63,12 +66,16 @@ impl Cow {
         ];
 
         for (dx, dy) in directions {
-            let new_x: i32 = self.x + dx;
-            let new_y: i32 = self.y + dy;
+            let new_x = self.x + dx;
+            let new_y = self.y + dy;
 
-            if let Some(cell) = grid.cell_at(new_x, new_y) {
+            if new_y >= 0
+                && new_y < cells.len() as i32
+                && new_x >= 0
+                && new_x < cells[0].len() as i32
+            {
+                let cell: &Cell = &cells[new_y as usize][new_x as usize];
                 if cell.role == crate::enums::cell_role::Role::Water {
-                    // Cow drinks without moving
                     self.thirst = add_thirst;
                     return;
                 }
@@ -76,8 +83,13 @@ impl Cow {
         }
     }
 
-    pub fn eat(&mut self, grid: &mut Grid, add_hunger: i32) {
-        if let Some(cell) = grid.cell_at_mut(self.x, self.y) {
+    pub fn eat(&mut self, cells: &mut Vec<Vec<Cell>>, add_hunger: i32) {
+        if self.y >= 0
+            && self.y < cells.len() as i32
+            && self.x >= 0
+            && self.x < cells[0].len() as i32
+        {
+            let cell = &mut cells[self.y as usize][self.x as usize];
             match cell.role {
                 crate::enums::cell_role::Role::Hay | crate::enums::cell_role::Role::Grass => {
                     self.hunger += add_hunger;
@@ -89,5 +101,39 @@ impl Cow {
                 _ => {} // Water or Farm cells cannot be eaten from
             }
         }
+    }
+
+    pub fn decide(&self, grid: &Grid) -> CowAction {
+        if self.thirst < 50 {
+            CowAction::Drink
+        } else if self.hunger < 50 {
+            CowAction::Eat
+        } else {
+            CowAction::Move(self.propose_move(grid))
+        }
+    }
+
+    pub fn propose_move(&self, grid: &Grid) -> (i32, i32) {
+        // Choose target: water if thirsty, hay if hungry
+        let target: Option<(i32, i32)> = if self.thirst < 50 {
+            grid.find_nearest(crate::enums::cell_role::Role::Water, self.x, self.y)
+        } else if self.hunger < 50 {
+            grid.find_nearest(crate::enums::cell_role::Role::Hay, self.x, self.y)
+                .or_else(|| grid.find_nearest(crate::enums::cell_role::Role::Grass, self.x, self.y))
+        } else {
+            None
+        };
+
+        if let Some(goal) = target {
+            if let Some(path) = astar_pathfinding(grid, (self.x, self.y), goal) {
+                if path.len() > 1 {
+                    // path[0] is the current position, path[1] is the next cell
+                    return path[1];
+                }
+            }
+        }
+
+        // If no path or no need to move, stay in place
+        (self.x, self.y)
     }
 }
