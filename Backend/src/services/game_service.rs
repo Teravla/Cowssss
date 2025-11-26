@@ -1,6 +1,19 @@
 use crate::{enums::cow_action::CowAction, model::grid::grid_structure::Grid};
 
 pub fn tick(grid: &mut Grid) {
+    // 0️⃣ Faire baisser hunger et thirst de toutes les vaches
+    for row in 0..grid.rows as usize {
+        for col in 0..grid.cols as usize {
+            for cow in &mut grid.cows[row][col] {
+                if !cow.alive {
+                    continue;
+                }
+                cow.hunger = (cow.hunger - 10).max(0);
+                cow.thirst = (cow.thirst - 10).max(0);
+            }
+        }
+    }
+
     // 1️⃣ Collecter toutes les décisions des vaches
     let mut decisions: Vec<(usize, usize, usize, CowAction)> = vec![];
     for y in 0..grid.rows as usize {

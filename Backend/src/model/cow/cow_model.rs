@@ -114,7 +114,6 @@ impl Cow {
     }
 
     pub fn propose_move(&self, grid: &Grid) -> (i32, i32) {
-        // Choose target: water if thirsty, hay if hungry
         let target: Option<(i32, i32)> = if self.thirst < 50 {
             grid.find_nearest(crate::enums::cell_role::Role::Water, self.x, self.y)
         } else if self.hunger < 50 {
@@ -127,13 +126,11 @@ impl Cow {
         if let Some(goal) = target {
             if let Some(path) = astar_pathfinding(grid, (self.x, self.y), goal) {
                 if path.len() > 1 {
-                    // path[0] is the current position, path[1] is the next cell
                     return path[1];
                 }
             }
         }
 
-        // If no path or no need to move, stay in place
         (self.x, self.y)
     }
 }

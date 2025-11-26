@@ -45,23 +45,13 @@ thread_local! {
 }
 
 #[wasm_bindgen]
-pub fn init_grid() {
-    GRID.with(|cell| {
-        let mut cell = cell.borrow_mut();
-        if cell.is_none() {
-            *cell = Some(Grid::new());
-        }
-    });
-}
-
-#[wasm_bindgen]
 pub fn render(ctx: &JsValue, number_of_cows: usize) {
     let ctx: CanvasRenderingContext2d = ctx
         .clone()
         .dyn_into()
         .expect("Impossible de convertir en CanvasRenderingContext2d");
 
-    GRID.with(|cell| {
+    GRID.with(|cell: &RefCell<Option<Grid>>| {
         let mut cell: std::cell::RefMut<'_, Option<Grid>> = cell.borrow_mut();
         let grid: &mut Grid = cell.get_or_insert_with(Grid::new);
 
@@ -69,8 +59,8 @@ pub fn render(ctx: &JsValue, number_of_cows: usize) {
         let total_cows: usize = grid
             .cows
             .iter()
-            .flat_map(|r| r.iter())
-            .map(|v| v.len())
+            .flat_map(|r: &Vec<Vec<Cow>>| r.iter())
+            .map(|v: &Vec<Cow>| v.len())
             .sum();
         if total_cows == 0 {
             let black_x = grid.special_col;
@@ -105,9 +95,18 @@ pub fn render(ctx: &JsValue, number_of_cows: usize) {
 
 #[wasm_bindgen]
 pub fn tick_js() {
-    GRID.with(|cell| {
+    GRID.with(|cell: &RefCell<Option<Grid>>| {
         if let Some(grid) = cell.borrow_mut().as_mut() {
             tick(grid);
+
+            let positions: Vec<_> = grid
+                .cows
+                .iter()
+                .flat_map(|row: &Vec<Vec<Cow>>| row.iter())
+                .flat_map(|col: &Vec<Cow>| col.iter())
+                .map(|cow: &Cow| format!("({}, {})", cow.x, cow.y))
+                .collect();
+            web_sys::console::log_1(&format!("Cow positions: {:?}", positions).into());
         }
     });
 }

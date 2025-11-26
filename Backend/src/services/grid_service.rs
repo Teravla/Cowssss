@@ -2,6 +2,8 @@ use crate::model::grid::grid_structure::Grid;
 use web_sys::CanvasRenderingContext2d;
 
 pub fn draw_grid(ctx: &CanvasRenderingContext2d, grid: &Grid) {
+    ctx.clear_rect(0.0, 0.0, grid.canvas_width, grid.canvas_height);
+
     for row in &grid.cells {
         for cell in row {
             ctx.set_fill_style_str(cell.color());
